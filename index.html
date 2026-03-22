@@ -259,6 +259,86 @@ footer span{color:var(--orange);}
   .print-section-break { page-break-before: always; }
 }
 .print-header { display: none; }
+
+/* ── LIVE GAME SCOREBOARD ── */
+.live-scoreboard{background:linear-gradient(135deg,#1D1160 0%,#0A0A0F 100%);border:2px solid var(--orange);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:0;position:relative;overflow:hidden;}
+.live-scoreboard::before{content:"LIVE";position:absolute;right:20px;top:16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:3px;color:var(--orange);animation:livepulse 1.5s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-scoreboard.not-live::before{content:"FINAL";animation:none;color:var(--muted);}
+.live-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.live-teams{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;}
+.live-team{text-align:center;flex:1;}
+.live-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.live-team-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:64px;line-height:1;color:var(--orange);}
+.live-team-score.opp{color:#fff;}
+.live-vs{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--muted);}
+.live-qtrs{display:flex;gap:0;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+.live-qtr{flex:1;text-align:center;padding:8px 4px;border-right:1px solid var(--border2);}
+.live-qtr:last-child{border-right:none;}
+.live-qtr.active-q{background:rgba(229,96,32,.15);}
+.live-qtr-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.live-qtr-scores{display:flex;flex-direction:column;gap:2px;}
+.live-qtr-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;}
+.live-qtr-val.phx{color:var(--orange);}
+.live-qtr-val.opp{color:#888;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.live-stat-box{background:rgba(255,255,255,.04);border-radius:var(--radius);padding:10px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;color:var(--orange);}
+.live-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.live-upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.live-upload-btn{background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:var(--radius);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.live-upload-btn:hover{background:#cf551a;}
+.live-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.live-upload-note{font-size:11px;color:var(--muted);}
+.live-status{font-size:12px;color:var(--win);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+.live-player-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.live-player-tbl th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-tbl th:first-child{text-align:left;}
+.live-player-tbl td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-tbl td:first-child{text-align:left;font-weight:600;color:#ddd;}
+.live-no-game{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-setup-btn{background:none;border:1px dashed var(--border2);color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:var(--radius);transition:all .2s;width:100%;}
+.live-setup-btn:hover{border-color:var(--orange);color:var(--orange);}
+#live-file-input{display:none;}
+
+/* ── LIVE SCOREBOARD ── */
+.live-board{background:var(--surface);border:2px solid var(--orange);border-radius:var(--radius-lg);overflow:hidden;margin-top:28px;}
+.live-board-header{background:var(--orange);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.live-board-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:#fff;}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
+.live-board-body{padding:16px 18px;}
+.live-score-row{display:grid;grid-template-columns:1fr 60px 60px 60px 60px 80px;gap:8px;align-items:center;margin-bottom:6px;}
+.live-score-row.hdr div{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;}
+.live-score-row.hdr div:first-child{text-align:left;}
+.live-team{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;}
+.live-q{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;text-align:center;color:var(--text);}
+.live-q.empty{color:var(--muted2);}
+.live-total{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;text-align:center;color:var(--orange);}
+.live-divider{height:1px;background:var(--border);margin:10px 0;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px;}
+.live-stat-box{background:var(--surface2);border-radius:var(--radius);padding:8px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:var(--orange);}
+.live-stat-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+.live-upload-bar{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.live-upload-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.live-upload-label span{color:var(--orange);}
+.live-btn{background:var(--surface2);border:1px solid var(--border);color:var(--orange);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:var(--radius);transition:all .2s;white-space:nowrap;}
+.live-btn:hover{background:rgba(229,96,32,.15);border-color:var(--orange);}
+.live-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
+.live-btn.primary:hover{background:#cf551a;}
+.live-player-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+.live-player-table th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-table th:first-child{text-align:left;}
+.live-player-table td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-table td:first-child{text-align:left;font-weight:600;}
+.live-player-table tr:last-child td{background:rgba(229,96,32,.07);font-weight:700;color:var(--orange);}
+#live-file-input{display:none;}
+.live-processing{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-tabs{display:flex;gap:4px;margin:10px 0;}
+.live-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.live-tab.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 </style>
 </head>
 <body>
@@ -278,6 +358,7 @@ footer span{color:var(--orange);}
     <button onclick="showSection('standings')">Standings</button>
     <button onclick="showSection('recap')">NBA Recap</button>
     <button onclick="showSection('upload')">+ Add Game</button>
+    <button onclick="startLiveGame()" style="background:var(--loss);color:#fff;" id="live-nav-btn">&#9679; Live Game</button>
   </nav>
 </header>
 
@@ -299,6 +380,92 @@ footer span{color:var(--orange);}
       <div class="hero-stat"><div class="hs-val" id="h-streak" style="color:var(--loss)">L3</div><div class="hs-lbl">Streak</div></div>
     </div>
   </div>
+</div>
+
+<!-- LIVE SCOREBOARD -->
+<div style="background:var(--surface);border-bottom:1px solid var(--border);padding:20px 28px;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div id="live-scoreboard-wrap">
+      <div class="live-no-game">
+        <div style="font-size:28px;margin-bottom:8px;">🏀</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">No Live Game</div>
+        <div style="margin-bottom:12px;">Upload a quarter score sheet to start tracking a game live.</div>
+        <button class="live-setup-btn" onclick="document.getElementById('live-file-input').click()">+ Start Live Game Tracking</button>
+        <input type="file" id="live-file-input" accept=".pdf">
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE SCOREBOARD -->
+  <div class="live-board" id="live-board" style="display:none;">
+    <div class="live-board-header">
+      <div class="live-board-title" id="live-game-title">LIVE GAME</div>
+      <div class="live-badge"><div class="live-dot"></div><span id="live-qtr-label">Q1</span></div>
+    </div>
+    <div class="live-board-body">
+      <!-- Score -->
+      <div class="live-score-row hdr">
+        <div>TEAM</div><div>Q1</div><div>Q2</div><div>Q3</div><div>Q4</div><div>TOTAL</div>
+      </div>
+      <div class="live-score-row" id="live-row-suns">
+        <div class="live-team" style="color:var(--orange)">Phoenix Suns</div>
+        <div class="live-q empty" id="lq-s-1">—</div>
+        <div class="live-q empty" id="lq-s-2">—</div>
+        <div class="live-q empty" id="lq-s-3">—</div>
+        <div class="live-q empty" id="lq-s-4">—</div>
+        <div class="live-total" id="lq-s-total">0</div>
+      </div>
+      <div class="live-score-row" id="live-row-opp">
+        <div class="live-team" id="live-opp-name">Opponent</div>
+        <div class="live-q empty" id="lq-o-1">—</div>
+        <div class="live-q empty" id="lq-o-2">—</div>
+        <div class="live-q empty" id="lq-o-3">—</div>
+        <div class="live-q empty" id="lq-o-4">—</div>
+        <div class="live-total" id="lq-o-total">0</div>
+      </div>
+
+      <div class="live-divider"></div>
+
+      <!-- Team stats -->
+      <div class="live-stats-grid" id="live-stats-grid" style="display:none;">
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-fg">—</div><div class="live-stat-lbl">FG%</div></div>
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-3p">—</div><div class="live-stat-lbl">3PT%</div></div>
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-ft">—</div><div class="live-stat-lbl">FT%</div></div>
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-reb">—</div><div class="live-stat-lbl">REB</div></div>
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-ast">—</div><div class="live-stat-lbl">AST</div></div>
+        <div class="live-stat-box"><div class="live-stat-val" id="ls-to">—</div><div class="live-stat-lbl">TO</div></div>
+      </div>
+
+      <!-- Player stats tabs -->
+      <div id="live-players-section" style="display:none;">
+        <div class="live-tabs">
+          <button class="live-tab active" onclick="switchLiveTab('stats')">Team Stats</button>
+          <button class="live-tab" onclick="switchLiveTab('players')">Player Lines</button>
+        </div>
+        <div id="live-tab-stats">
+          <div class="live-stats-grid" id="live-stats-grid2"></div>
+        </div>
+        <div id="live-tab-players" style="display:none;">
+          <div style="overflow-x:auto;">
+            <table class="live-player-table" id="live-player-table">
+              <thead><tr><th>Player</th><th>PTS</th><th>REB</th><th>AST</th><th>FG</th><th>3PT</th><th>FT</th><th>+/-</th></tr></thead>
+              <tbody id="live-player-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload bar -->
+      <div class="live-upload-bar">
+        <div class="live-upload-label"><span>Upload quarter score sheet</span> · PDF after each quarter</div>
+        <div id="live-processing" style="display:none;font-size:12px;color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-weight:700;">Reading PDF...</div>
+        <button class="live-btn" onclick="document.getElementById('live-file-input').click()">&#11014; Upload Q Sheet</button>
+        <button class="live-btn" onclick="endLiveGame()" style="color:var(--loss);border-color:var(--loss);">End Game</button>
+        <input type="file" id="live-file-input" accept=".pdf">
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 <main>
@@ -999,6 +1166,86 @@ function downloadPDF(gameId) {
   .ts-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-top: 2px; }
   .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; text-align: center; }
   @media print { body { padding: 20px; } }
+
+/* ── LIVE GAME SCOREBOARD ── */
+.live-scoreboard{background:linear-gradient(135deg,#1D1160 0%,#0A0A0F 100%);border:2px solid var(--orange);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:0;position:relative;overflow:hidden;}
+.live-scoreboard::before{content:"LIVE";position:absolute;right:20px;top:16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:3px;color:var(--orange);animation:livepulse 1.5s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-scoreboard.not-live::before{content:"FINAL";animation:none;color:var(--muted);}
+.live-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.live-teams{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;}
+.live-team{text-align:center;flex:1;}
+.live-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.live-team-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:64px;line-height:1;color:var(--orange);}
+.live-team-score.opp{color:#fff;}
+.live-vs{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--muted);}
+.live-qtrs{display:flex;gap:0;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+.live-qtr{flex:1;text-align:center;padding:8px 4px;border-right:1px solid var(--border2);}
+.live-qtr:last-child{border-right:none;}
+.live-qtr.active-q{background:rgba(229,96,32,.15);}
+.live-qtr-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.live-qtr-scores{display:flex;flex-direction:column;gap:2px;}
+.live-qtr-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;}
+.live-qtr-val.phx{color:var(--orange);}
+.live-qtr-val.opp{color:#888;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.live-stat-box{background:rgba(255,255,255,.04);border-radius:var(--radius);padding:10px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;color:var(--orange);}
+.live-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.live-upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.live-upload-btn{background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:var(--radius);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.live-upload-btn:hover{background:#cf551a;}
+.live-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.live-upload-note{font-size:11px;color:var(--muted);}
+.live-status{font-size:12px;color:var(--win);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+.live-player-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.live-player-tbl th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-tbl th:first-child{text-align:left;}
+.live-player-tbl td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-tbl td:first-child{text-align:left;font-weight:600;color:#ddd;}
+.live-no-game{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-setup-btn{background:none;border:1px dashed var(--border2);color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:var(--radius);transition:all .2s;width:100%;}
+.live-setup-btn:hover{border-color:var(--orange);color:var(--orange);}
+#live-file-input{display:none;}
+
+/* ── LIVE SCOREBOARD ── */
+.live-board{background:var(--surface);border:2px solid var(--orange);border-radius:var(--radius-lg);overflow:hidden;margin-top:28px;}
+.live-board-header{background:var(--orange);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.live-board-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:#fff;}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
+.live-board-body{padding:16px 18px;}
+.live-score-row{display:grid;grid-template-columns:1fr 60px 60px 60px 60px 80px;gap:8px;align-items:center;margin-bottom:6px;}
+.live-score-row.hdr div{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;}
+.live-score-row.hdr div:first-child{text-align:left;}
+.live-team{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;}
+.live-q{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;text-align:center;color:var(--text);}
+.live-q.empty{color:var(--muted2);}
+.live-total{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;text-align:center;color:var(--orange);}
+.live-divider{height:1px;background:var(--border);margin:10px 0;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px;}
+.live-stat-box{background:var(--surface2);border-radius:var(--radius);padding:8px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:var(--orange);}
+.live-stat-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+.live-upload-bar{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.live-upload-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.live-upload-label span{color:var(--orange);}
+.live-btn{background:var(--surface2);border:1px solid var(--border);color:var(--orange);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:var(--radius);transition:all .2s;white-space:nowrap;}
+.live-btn:hover{background:rgba(229,96,32,.15);border-color:var(--orange);}
+.live-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
+.live-btn.primary:hover{background:#cf551a;}
+.live-player-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+.live-player-table th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-table th:first-child{text-align:left;}
+.live-player-table td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-table td:first-child{text-align:left;font-weight:600;}
+.live-player-table tr:last-child td{background:rgba(229,96,32,.07);font-weight:700;color:var(--orange);}
+#live-file-input{display:none;}
+.live-processing{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-tabs{display:flex;gap:4px;margin:10px 0;}
+.live-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.live-tab.active{background:var(--orange);border-color:var(--orange);color:#fff;}
 </style>
 </head>
 <body>
@@ -1052,6 +1299,451 @@ function downloadPDF(gameId) {
       win.print();
     }, 500);
   };
+}
+
+// ── LIVE GAME TRACKER ────────────────────────────────────────────────────────
+var LIVE_KEY='suns_live_game_v1';
+var liveGame=null;
+
+function loadLiveGame(){
+  try{var r=localStorage.getItem(LIVE_KEY);if(r)liveGame=JSON.parse(r);}catch(e){}
+}
+
+function saveLiveGame(){
+  try{localStorage.setItem(LIVE_KEY,JSON.stringify(liveGame));}catch(e){}
+}
+
+function clearLiveGame(){
+  liveGame=null;
+  try{localStorage.removeItem(LIVE_KEY);}catch(e){}
+  renderLiveScoreboard();
+}
+
+function renderLiveScoreboard(){
+  var wrap=document.getElementById('live-scoreboard-wrap');
+  if(!wrap)return;
+  if(!liveGame){
+    wrap.innerHTML='<div class="live-no-game"><div style="font-size:28px;margin-bottom:8px;">&#127936;</div><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">No Live Game</div><div style="margin-bottom:12px;">Upload a quarter score sheet to track a game live.</div><button class="live-setup-btn" onclick="document.getElementById(\'live-file-input\').click()">+ Start Live Game Tracking</button><input type="file" id="live-file-input" accept=".pdf"></div>';
+    document.getElementById('live-file-input').addEventListener('change',function(e){if(e.target.files[0])processLivePDF(e.target.files[0]);});
+    return;
+  }
+
+  var g=liveGame;
+  var phxTotal=g.quarters.phx.reduce(function(a,b){return a+b;},0);
+  var oppTotal=g.quarters.opp.reduce(function(a,b){return a+b;},0);
+  var currentQ=g.quarters.phx.filter(function(v){return v>0;}).length;
+  var isLive=currentQ<4;
+  var isFinal=!isLive;
+
+  // Quarter cells
+  var qtrHTML='';
+  ['Q1','Q2','Q3','Q4'].forEach(function(q,i){
+    var isActive=i===currentQ&&isLive;
+    var phxScore=g.quarters.phx[i]||0;
+    var oppScore=g.quarters.opp[i]||0;
+    qtrHTML+='<div class="live-qtr'+(isActive?' active-q':'')+'">';
+    qtrHTML+='<div class="live-qtr-lbl">'+q+'</div>';
+    qtrHTML+='<div class="live-qtr-scores">';
+    qtrHTML+='<div class="live-qtr-val phx">'+(phxScore||'-')+'</div>';
+    qtrHTML+='<div class="live-qtr-val opp">'+(oppScore||'-')+'</div>';
+    qtrHTML+='</div></div>';
+  });
+
+  // Team stats
+  var tsHTML='';
+  if(g.teamStats){
+    var ts=g.teamStats;
+    [['FG%',ts.fgPct+'%'],['REB',ts.reb],['AST',ts.ast],['TO',ts.to],['Paint',ts.paintPts],['3PT%',ts.threePct+'%']].forEach(function(s){
+      tsHTML+='<div class="live-stat-box"><div class="live-stat-val">'+s[1]+'</div><div class="live-stat-lbl">'+s[0]+'</div></div>';
+    });
+  }
+
+  // Player table
+  var playerHTML='';
+  if(g.players&&g.players.length>0){
+    playerHTML='<div style="margin-top:16px;"><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;">&#9728; Suns Player Stats</div>';
+    playerHTML+='<div style="overflow-x:auto;"><table class="live-player-tbl"><thead><tr><th>Player</th><th>PTS</th><th>REB</th><th>AST</th><th>FG</th><th>3PT</th><th>+/-</th></tr></thead><tbody>';
+    g.players.forEach(function(p){
+      var pm=p.pm>0?'+'+p.pm:p.pm;
+      var pmC=p.pm>0?'color:var(--win)':p.pm<0?'color:var(--loss)':'color:var(--muted)';
+      playerHTML+='<tr><td>'+p.name+'</td><td>'+p.pts+'</td><td>'+p.reb+'</td><td>'+p.ast+'</td><td>'+p.fg+'</td><td>'+p.three+'</td><td style="'+pmC+'">'+pm+'</td></tr>';
+    });
+    playerHTML+='</tbody></table></div></div>';
+  }
+
+  var uploadStatus=g.lastUpdated?'Last updated: Q'+currentQ+' — '+g.lastUpdated:'';
+
+  wrap.innerHTML='<div class="live-scoreboard'+(isFinal?' not-live':'')+'">'+
+    '<div class="live-title">&#9728; PHX Suns '+(isLive?'— LIVE Q'+currentQ:'— FINAL')+' vs '+g.opponent+'</div>'+
+    '<div class="live-teams">'+
+      '<div class="live-team">'+
+        '<div class="live-team-name">PHX Suns</div>'+
+        '<div class="live-team-score">'+phxTotal+'</div>'+
+      '</div>'+
+      '<div class="live-vs">VS</div>'+
+      '<div class="live-team">'+
+        '<div class="live-team-name">'+g.oppAbbr+'</div>'+
+        '<div class="live-team-score opp">'+oppTotal+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="live-qtrs">'+qtrHTML+'</div>'+
+    (tsHTML?'<div class="live-stats-grid">'+tsHTML+'</div>':'')+
+    playerHTML+
+    '<div class="live-upload-row" style="margin-top:16px;">'+
+      '<button class="live-upload-btn" id="live-upload-btn" onclick="document.getElementById(\'live-file-input\').click()">'+
+        '<div class="spinner" id="live-spinner"></div>'+
+        '<span>&#8679; Upload Q'+(currentQ<4?currentQ+1:'Final')+' Score Sheet</span>'+
+      '</button>'+
+      '<button class="live-upload-btn" style="background:var(--surface3);border:1px solid var(--border);color:var(--muted);" onclick="if(confirm(\'Clear live game?\'))clearLiveGame()">&#x2715; Clear</button>'+
+      '<span class="live-status">'+uploadStatus+'</span>'+
+      '<input type="file" id="live-file-input" accept=".pdf">'+
+    '</div>'+
+  '</div>';
+
+  document.getElementById('live-file-input').addEventListener('change',function(e){
+    if(e.target.files[0])processLivePDF(e.target.files[0]);
+  });
+}
+
+async function processLivePDF(file){
+  var btn=document.getElementById('live-upload-btn');
+  var spinner=document.getElementById('live-spinner');
+  if(btn){btn.disabled=true;}
+  if(spinner){spinner.style.display='block';}
+
+  var statusEl=document.querySelector('.live-status');
+  if(statusEl)statusEl.textContent='Reading PDF...';
+
+  var base64=await new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(',')[1]);};
+    r.onerror=function(){rej(new Error('Read failed'));};
+    r.readAsDataURL(file);
+  });
+
+  var currentQ=liveGame?liveGame.quarters.phx.filter(function(v){return v>0;}).length+1:1;
+
+  var prompt='Read this NBA score sheet PDF and extract stats. This is the score sheet after Q'+currentQ+'. Return ONLY valid JSON: {"opponent":"Full Team Name","oppAbbr":"3-LETTER","quarter":'+currentQ+',"quarters":{"phx":[Q1,Q2,Q3,Q4],"opp":[Q1,Q2,Q3,Q4]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"to":0,"paintPts":0},"players":[{"name":"First Last","pts":0,"reb":0,"ast":0,"fg":"M/A","three":"M/A","pm":0}]}. Use 0 for quarters not yet played. Only include Suns players who played.';
+
+  try{
+    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]})});
+    var d=await r.json();
+    var text=d.content.map(function(i){return i.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(text);
+
+    // Merge with existing live game or create new
+    if(!liveGame){
+      liveGame={opponent:parsed.opponent,oppAbbr:parsed.oppAbbr,quarters:{phx:[0,0,0,0],opp:[0,0,0,0]},teamStats:parsed.teamStats||null,players:parsed.players||[]};
+    }
+
+    // Update quarters up to current
+    if(parsed.quarters){
+      for(var i=0;i<4;i++){
+        if(parsed.quarters.phx[i]>0)liveGame.quarters.phx[i]=parsed.quarters.phx[i];
+        if(parsed.quarters.opp[i]>0)liveGame.quarters.opp[i]=parsed.quarters.opp[i];
+      }
+    }
+    if(parsed.teamStats)liveGame.teamStats=parsed.teamStats;
+    if(parsed.players&&parsed.players.length>0)liveGame.players=parsed.players;
+    liveGame.lastUpdated=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+    saveLiveGame();
+    renderLiveScoreboard();
+  }catch(e){
+    if(statusEl)statusEl.textContent='Error: '+e.message;
+    if(btn){btn.disabled=false;}
+    if(spinner){spinner.style.display='none';}
+  }
+}
+
+// ── LIVE GAME ────────────────────────────────────────────────────────────────
+var liveGameData = {opp:'', oppAbbr:'', quarters:{suns:[null,null,null,null],opp:[null,null,null,null]}, currentQ:0, players:[], teamStats:{}};
+
+function startLiveGame(){
+  var opp = prompt('Who are the Suns playing tonight? (e.g. Golden State Warriors)');
+  if(!opp) return;
+  var abbr = prompt('3-letter abbreviation? (e.g. GSW)');
+  if(!abbr) return;
+  liveGameData = {opp:opp, oppAbbr:abbr.toUpperCase(), quarters:{suns:[null,null,null,null],opp:[null,null,null,null]}, currentQ:0, players:[], teamStats:{}};
+  document.getElementById('live-board').style.display='block';
+  document.getElementById('live-game-title').textContent='PHX vs '+liveGameData.oppAbbr+' — LIVE';
+  document.getElementById('live-opp-name').textContent=opp;
+  document.getElementById('live-nav-btn').style.background='var(--win)';
+  document.getElementById('live-nav-btn').textContent='● LIVE';
+  updateLiveScoreboard();
+  document.getElementById('live-board').scrollIntoView({behavior:'smooth'});
+}
+
+function switchLiveTab(tab){
+  document.querySelectorAll('.live-tab').forEach(function(b){b.classList.remove('active');});
+  event.target.classList.add('active');
+  document.getElementById('live-tab-stats').style.display = tab==='stats'?'block':'none';
+  document.getElementById('live-tab-players').style.display = tab==='players'?'block':'none';
+}
+
+function updateLiveScoreboard(){
+  var qs = liveGameData.quarters;
+  var sunsTotal=0, oppTotal=0;
+  for(var i=0;i<4;i++){
+    var sq = document.getElementById('lq-s-'+(i+1));
+    var oq = document.getElementById('lq-o-'+(i+1));
+    if(qs.suns[i]!==null){
+      sq.textContent=qs.suns[i]; sq.classList.remove('empty');
+      sunsTotal+=qs.suns[i];
+    } else {
+      sq.textContent='—'; sq.classList.add('empty');
+    }
+    if(qs.opp[i]!==null){
+      oq.textContent=qs.opp[i]; oq.classList.remove('empty');
+      oppTotal+=qs.opp[i];
+    } else {
+      oq.textContent='—'; oq.classList.add('empty');
+    }
+  }
+  document.getElementById('lq-s-total').textContent=sunsTotal;
+  document.getElementById('lq-o-total').textContent=oppTotal;
+  document.getElementById('lq-s-total').style.color=sunsTotal>=oppTotal?'var(--win)':'var(--loss)';
+  document.getElementById('lq-o-total').style.color=oppTotal>sunsTotal?'var(--win)':'var(--loss)';
+  var completedQ = qs.suns.filter(function(q){return q!==null;}).length;
+  var qLabel = completedQ>=4?'FINAL':'Q'+(completedQ+1)+' IN PROGRESS';
+  document.getElementById('live-qtr-label').textContent=qLabel;
+
+  // Update team stats if available
+  if(liveGameData.teamStats && liveGameData.teamStats.fgPct){
+    var ts=liveGameData.teamStats;
+    document.getElementById('ls-fg').textContent=ts.fgPct+'%';
+    document.getElementById('ls-3p').textContent=ts.threePct+'%';
+    document.getElementById('ls-ft').textContent=ts.ftPct+'%';
+    document.getElementById('ls-reb').textContent=ts.reb;
+    document.getElementById('ls-ast').textContent=ts.ast;
+    document.getElementById('ls-to').textContent=ts.to;
+    document.getElementById('live-stats-grid').style.display='grid';
+  }
+
+  // Update player table if available
+  if(liveGameData.players && liveGameData.players.length>0){
+    document.getElementById('live-players-section').style.display='block';
+    var tbody=document.getElementById('live-player-tbody');
+    tbody.innerHTML='';
+    var maxPts=Math.max.apply(null,liveGameData.players.map(function(p){return p.pts||0;}));
+    liveGameData.players.forEach(function(p){
+      var pmColor=p.pm>0?'var(--win)':p.pm<0?'var(--loss)':'var(--muted)';
+      var pmStr=(p.pm>0?'+':'')+p.pm;
+      tbody.innerHTML+='<tr>'
+        +'<td>'+p.name+'</td>'
+        +'<td style="'+(p.pts===maxPts?'color:var(--orange);font-weight:700;':'')+'">'+(p.pts||0)+'</td>'
+        +'<td>'+(p.reb||0)+'</td>'
+        +'<td>'+(p.ast||0)+'</td>'
+        +'<td>'+(p.fg||'—')+'</td>'
+        +'<td>'+(p.three||'—')+'</td>'
+        +'<td>'+(p.ft||'—')+'</td>'
+        +'<td style="color:'+pmColor+'">'+pmStr+'</td>'
+        +'</tr>';
+    });
+    // Totals row
+    var totalPts=liveGameData.players.reduce(function(s,p){return s+(p.pts||0);},0);
+    var ts=liveGameData.teamStats||{};
+    tbody.innerHTML+='<tr><td>TOTALS</td><td>'+totalPts+'</td><td>'+(ts.reb||'—')+'</td><td>'+(ts.ast||'—')+'</td><td>'+(ts.fgPct?ts.fgPct+'%':'—')+'</td><td>'+(ts.threePct?ts.threePct+'%':'—')+'</td><td>'+(ts.ftPct?ts.ftPct+'%':'—')+'</td><td>—</td></tr>';
+  }
+}
+
+function endLiveGame(){
+  if(!confirm('End the live game and save it to your Game Log?')) return;
+  var qs=liveGameData.quarters;
+  var sunsTotal=qs.suns.reduce(function(s,q){return s+(q||0);},0);
+  var oppTotal=qs.opp.reduce(function(s,q){return s+(q||0);},0);
+  var result=sunsTotal>=oppTotal?'W':'L';
+  var today=new Date();
+  var dateStr=today.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var gid='PHX-'+liveGameData.oppAbbr+'-LIVE-'+Date.now();
+  var newGame={
+    id:gid,
+    date:dateStr,
+    opponent:liveGameData.opp,
+    oppAbbr:liveGameData.oppAbbr,
+    location:'TBD',
+    homeAway:'Home',
+    sunsScore:sunsTotal,
+    oppScore:oppTotal,
+    result:result,
+    attendance:'—',
+    duration:'—',
+    quarters:{suns:qs.suns.map(function(q){return q||0;}),opp:qs.opp.map(function(q){return q||0;})},
+    teamStats:liveGameData.teamStats||{fgPct:0,threePct:0,ftPct:0,reb:0,ast:0,stl:0,blk:0,to:0,paintPts:0,secondChance:0,fastBreak:0},
+    players:liveGameData.players||[],
+    report:null
+  };
+  games.unshift(newGame);
+  save(games);
+  document.getElementById('live-board').style.display='none';
+  document.getElementById('live-nav-btn').style.background='var(--loss)';
+  document.getElementById('live-nav-btn').textContent='● Live Game';
+  renderGames();
+  updateHero();
+  showSection('games');
+  alert('Game saved to your Game Log!');
+}
+
+// Live PDF upload handler
+document.getElementById('live-file-input').addEventListener('change', function(e){
+  if(e.target.files[0]) processLiveQuarter(e.target.files[0]);
+});
+
+async function processLiveQuarter(file){
+  var procEl=document.getElementById('live-processing');
+  var uploadBtn=document.querySelector('.live-upload-bar .live-btn');
+  procEl.style.display='block';
+  procEl.textContent='Reading PDF...';
+
+  var base64=await new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(',')[1]);};
+    r.onerror=function(){rej(new Error('Read failed'));};
+    r.readAsDataURL(file);
+  });
+
+  var completedQ=liveGameData.quarters.suns.filter(function(q){return q!==null;}).length;
+  var thisQ=completedQ+1;
+  procEl.textContent='Claude is reading Q'+thisQ+' stats...';
+
+  var prompt='You are an NBA stats extractor. Read this NBA score sheet PDF and extract the stats. This is a PARTIAL game score sheet after Q'+thisQ+'. Return ONLY valid JSON, no markdown:\n{"sunsQ":'+thisQ+'_score_number,"oppQ":'+thisQ+'_score_number,"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0},"players":[{"name":"First Last","pts":0,"reb":0,"ast":0,"fg":"M/A","three":"M/A","ft":"M/A","pm":0}]}\nThe Suns may be VISITOR or HOME. Extract cumulative stats for all Suns players who played. Return exact numbers from the sheet.';
+
+  try{
+    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]})});
+    var d=await r.json();
+    var raw=d.content.map(function(i){return i.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(raw);
+    liveGameData.quarters.suns[thisQ-1]=parsed.sunsQ||0;
+    liveGameData.quarters.opp[thisQ-1]=parsed.oppQ||0;
+    if(parsed.teamStats) liveGameData.teamStats=parsed.teamStats;
+    if(parsed.players && parsed.players.length>0) liveGameData.players=parsed.players;
+    updateLiveScoreboard();
+    procEl.textContent='Q'+thisQ+' updated!';
+    setTimeout(function(){procEl.style.display='none';},2000);
+  }catch(e){
+    procEl.textContent='Error: '+e.message;
+    setTimeout(function(){procEl.style.display='none';},3000);
+  }
+  document.getElementById('live-file-input').value='';
+}
+
+// ── LIVE GAME ────────────────────────────────────────────────────────────────
+var liveGameData={opp:'',oppAbbr:'',quarters:{suns:[null,null,null,null],opp:[null,null,null,null]},currentQ:0,players:[],teamStats:{}};
+
+function startLiveGame(){
+  var opp=prompt('Who are the Suns playing tonight? (e.g. Golden State Warriors)');
+  if(!opp)return;
+  var abbr=prompt('3-letter abbreviation? (e.g. GSW)');
+  if(!abbr)return;
+  liveGameData={opp:opp,oppAbbr:abbr.toUpperCase(),quarters:{suns:[null,null,null,null],opp:[null,null,null,null]},currentQ:0,players:[],teamStats:{}};
+  document.getElementById('live-board').style.display='block';
+  document.getElementById('live-game-title').textContent='PHX vs '+liveGameData.oppAbbr+' - LIVE';
+  document.getElementById('live-opp-name').textContent=opp;
+  document.getElementById('live-nav-btn').style.background='var(--win)';
+  document.getElementById('live-nav-btn').textContent='LIVE';
+  updateLiveScoreboard();
+  document.getElementById('live-board').scrollIntoView({behavior:'smooth'});
+}
+
+function switchLiveTab(tab){
+  document.querySelectorAll('.live-tab').forEach(function(b){b.classList.remove('active');});
+  event.target.classList.add('active');
+  document.getElementById('live-tab-stats').style.display=tab==='stats'?'block':'none';
+  document.getElementById('live-tab-players').style.display=tab==='players'?'block':'none';
+}
+
+function updateLiveScoreboard(){
+  var qs=liveGameData.quarters;
+  var sunsTotal=0,oppTotal=0;
+  for(var i=0;i<4;i++){
+    var sq=document.getElementById('lq-s-'+(i+1));
+    var oq=document.getElementById('lq-o-'+(i+1));
+    if(qs.suns[i]!==null){sq.textContent=qs.suns[i];sq.classList.remove('empty');sunsTotal+=qs.suns[i];}
+    else{sq.textContent='--';sq.classList.add('empty');}
+    if(qs.opp[i]!==null){oq.textContent=qs.opp[i];oq.classList.remove('empty');oppTotal+=qs.opp[i];}
+    else{oq.textContent='--';oq.classList.add('empty');}
+  }
+  document.getElementById('lq-s-total').textContent=sunsTotal;
+  document.getElementById('lq-o-total').textContent=oppTotal;
+  document.getElementById('lq-s-total').style.color=sunsTotal>=oppTotal?'var(--win)':'var(--loss)';
+  document.getElementById('lq-o-total').style.color=oppTotal>sunsTotal?'var(--win)':'var(--loss)';
+  var completedQ=qs.suns.filter(function(q){return q!==null;}).length;
+  document.getElementById('live-qtr-label').textContent=completedQ>=4?'FINAL':'Q'+(completedQ+1)+' IN PROGRESS';
+  if(liveGameData.teamStats&&liveGameData.teamStats.fgPct){
+    var ts=liveGameData.teamStats;
+    document.getElementById('ls-fg').textContent=ts.fgPct+'%';
+    document.getElementById('ls-3p').textContent=ts.threePct+'%';
+    document.getElementById('ls-ft').textContent=ts.ftPct+'%';
+    document.getElementById('ls-reb').textContent=ts.reb;
+    document.getElementById('ls-ast').textContent=ts.ast;
+    document.getElementById('ls-to').textContent=ts.to;
+    document.getElementById('live-stats-grid').style.display='grid';
+  }
+  if(liveGameData.players&&liveGameData.players.length>0){
+    document.getElementById('live-players-section').style.display='block';
+    var tbody=document.getElementById('live-player-tbody');
+    tbody.innerHTML='';
+    var maxPts=Math.max.apply(null,liveGameData.players.map(function(p){return p.pts||0;}));
+    liveGameData.players.forEach(function(p){
+      var pmColor=p.pm>0?'var(--win)':p.pm<0?'var(--loss)':'var(--muted)';
+      tbody.innerHTML+='<tr><td>'+p.name+'</td><td style="'+(p.pts===maxPts?'color:var(--orange);font-weight:700;':'')+'">'+(p.pts||0)+'</td><td>'+(p.reb||0)+'</td><td>'+(p.ast||0)+'</td><td>'+(p.fg||'--')+'</td><td>'+(p.three||'--')+'</td><td>'+(p.ft||'--')+'</td><td style="color:'+pmColor+'">'+(p.pm>0?'+':'')+p.pm+'</td></tr>';
+    });
+    var ts=liveGameData.teamStats||{};
+    var totPts=liveGameData.players.reduce(function(s,p){return s+(p.pts||0);},0);
+    tbody.innerHTML+='<tr><td>TOTALS</td><td>'+totPts+'</td><td>'+(ts.reb||'--')+'</td><td>'+(ts.ast||'--')+'</td><td>'+(ts.fgPct?ts.fgPct+'%':'--')+'</td><td>'+(ts.threePct?ts.threePct+'%':'--')+'</td><td>'+(ts.ftPct?ts.ftPct+'%':'--')+'</td><td>--</td></tr>';
+  }
+}
+
+function endLiveGame(){
+  if(!confirm('End the live game and save it to your Game Log?'))return;
+  var qs=liveGameData.quarters;
+  var sunsTotal=qs.suns.reduce(function(s,q){return s+(q||0);},0);
+  var oppTotal=qs.opp.reduce(function(s,q){return s+(q||0);},0);
+  var result=sunsTotal>=oppTotal?'W':'L';
+  var today=new Date();
+  var dateStr=today.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  var gid='PHX-'+liveGameData.oppAbbr+'-LIVE-'+Date.now();
+  var newGame={id:gid,date:dateStr,opponent:liveGameData.opp,oppAbbr:liveGameData.oppAbbr,location:'TBD',homeAway:'Home',sunsScore:sunsTotal,oppScore:oppTotal,result:result,attendance:'--',duration:'--',quarters:{suns:qs.suns.map(function(q){return q||0;}),opp:qs.opp.map(function(q){return q||0;})},teamStats:liveGameData.teamStats||{fgPct:0,threePct:0,ftPct:0,reb:0,ast:0,stl:0,blk:0,to:0,paintPts:0,secondChance:0,fastBreak:0},players:liveGameData.players||[],report:null};
+  games.unshift(newGame);
+  save(games);
+  document.getElementById('live-board').style.display='none';
+  document.getElementById('live-nav-btn').style.background='var(--loss)';
+  document.getElementById('live-nav-btn').textContent='Live Game';
+  renderGames();
+  updateHero();
+  showSection('games');
+}
+
+document.getElementById('live-file-input').addEventListener('change',function(e){
+  if(e.target.files[0])processLiveQuarter(e.target.files[0]);
+});
+
+async function processLiveQuarter(file){
+  var procEl=document.getElementById('live-processing');
+  procEl.style.display='block';
+  procEl.textContent='Reading PDF...';
+  var base64=await new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=function(){rej(new Error('Read failed'));};r.readAsDataURL(file);});
+  var completedQ=liveGameData.quarters.suns.filter(function(q){return q!==null;}).length;
+  var thisQ=completedQ+1;
+  procEl.textContent='Reading Q'+thisQ+' stats...';
+  var prompt='You are an NBA stats extractor. Read this NBA quarter score sheet PDF. This is cumulative stats through Q'+thisQ+'. Return ONLY valid JSON, no markdown: {"sunsQ":0,"oppQ":0,"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0},"players":[{"name":"First Last","pts":0,"reb":0,"ast":0,"fg":"M/A","three":"M/A","ft":"M/A","pm":0}]} The Suns may be VISITOR or HOME. sunsQ and oppQ are the points scored THIS quarter only.';
+  try{
+    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]})});
+    var d=await r.json();
+    var raw=d.content.map(function(i){return i.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(raw);
+    liveGameData.quarters.suns[thisQ-1]=parsed.sunsQ||0;
+    liveGameData.quarters.opp[thisQ-1]=parsed.oppQ||0;
+    if(parsed.teamStats)liveGameData.teamStats=parsed.teamStats;
+    if(parsed.players&&parsed.players.length>0)liveGameData.players=parsed.players;
+    updateLiveScoreboard();
+    procEl.textContent='Q'+thisQ+' updated!';
+    setTimeout(function(){procEl.style.display='none';},2000);
+  }catch(e){
+    procEl.textContent='Error: '+e.message;
+    setTimeout(function(){procEl.style.display='none';},3000);
+  }
+  document.getElementById('live-file-input').value='';
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
