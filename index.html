@@ -1025,6 +1025,9 @@ function renderStandings() {
 var recapGames = [];
 
 async function fetchRecap() {
+  var now = new Date();
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var todayStr = months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
   var btn = document.getElementById('recap-btn');
   btn.disabled = true;
   btn.textContent = 'Fetching...';
@@ -1040,14 +1043,14 @@ async function fetchRecap() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 800,
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: 'Search for NBA scores from March 20 2026. List each game on its own line in this exact format: GAME: Team A 110 - Team B 98. Only output lines starting with GAME:' }]
+        messages: [{ role: 'user', content: 'Search for NBA scores from ' + todayStr + '. List each game on its own line in this exact format: GAME: Team A 110 - Team B 98. Only output lines starting with GAME:' }]
       })
     });
     var data = await resp.json();
     var text = (data.content || []).map(function (i) { return i.text || ''; }).join('');
     recapGames = text.split('\n').filter(function (l) { return l.trim().indexOf('GAME:') === 0; }).map(function (l) { return l.replace('GAME:', '').trim(); });
 
-    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + recapGames.length + ' games &middot; March 20, 2026</p>';
+    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + recapGames.length + ' games &middot; ' + todayStr + '</p>';
     var html = '';
     recapGames.forEach(function (g) { html += '<div class="recap-card"><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:18px">' + g + '</div></div>'; });
     document.getElementById('recap-games').innerHTML = html;
@@ -1072,7 +1075,7 @@ async function generateRecap() {
     var resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Write an ESPN-style NBA nightly recap for March 20 2026. Games: ' + recapGames.join(', ') + '. Write 3-4 energetic paragraphs covering highlights and storylines.' }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Write an ESPN-style NBA nightly recap for ' + todayStr + '. Games: ' + recapGames.join(', ') + '. Write 3-4 energetic paragraphs covering highlights and storylines.' }] })
     });
     var data = await resp.json();
     var text = (data.content || []).map(function (i) { return i.text || ''; }).join('');
