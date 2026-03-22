@@ -582,22 +582,19 @@ function switchTab(btn,tab,id){
 
 function buildReport(g){
   const hasR=g.report&&g.report.summary;
-  const badge=hasR?`<span class="gen-badge">✓ Generated</span>`:'';
   let inner='';
   if(hasR){
     const r=g.report;
-    inner=`<h3>Game Summary${badge}</h3>${r.summary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}<h4>Key Performers</h4>`;
+    inner=`<h3>Game Summary <span class="gen-badge">✓ Generated</span></h3>${r.summary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}<h4>Key Performers</h4>`;
     r.performers.forEach(p=>{inner+=`<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`;});
     inner+=`<h4>Notes</h4>`;
     r.notes.forEach(n=>{inner+=`<p>• ${n}</p>`;});
   } else {
-    inner=`<div class="empty"><div class="empty-icon">📝</div>No report yet. Click Generate below.</div>`;
+    inner=`<div class="empty"><div class="empty-icon">📝</div>No report yet. Click Generate Report below.</div>`;
   }
-  return `<div class="ai-bar"><div class="ai-bar-lbl"><span>AI Report</span> · Auto-generated from box score</div>
-    <button class="ai-btn" id="ai-btn-${g.id}" onclick="generateReport('${g.id}')">
-      <div class="spinner"></div><span>${hasR?'↺ Regenerate':'✦ Generate Report'}</span>
-    </button></div>
-    <div class="report-panel" id="rc-${g.id}">${inner}</div>`;
+  const pdfBtn=hasR?`<button class="ai-btn" style="background:var(--surface3);border:1px solid var(--border);color:var(--orange);" onclick="event.stopPropagation();downloadPDF('${g.id}')">&#11015; Download PDF</button>`:'';
+  const genBtn=`<button class="ai-btn" id="ai-btn-${g.id}" onclick="event.stopPropagation();generateReport('${g.id}')"><div class="spinner"></div><span>${hasR?'&#x21BA; Regenerate':'&#10022; Generate Report'}</span></button>`;
+  return `<div class="ai-bar"><div class="ai-bar-lbl"><span>AI Report</span> · Auto-generated from box score</div><div style="display:flex;gap:8px;align-items:center;">${pdfBtn}${genBtn}</div></div><div class="report-panel" id="rc-${g.id}">${inner}</div>`;
 }
 
 function buildBox(g){
@@ -650,19 +647,14 @@ Pick 3 most impactful Suns performers. Be specific with numbers.`;
     parsed.performers.forEach(p=>{inner+=`<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`;});
     inner+=`<h4>Notes</h4>`;parsed.notes.forEach(n=>{inner+=`<p>• ${n}</p>`;});
     rc.innerHTML=inner;
-    btn.querySelector('span').textContent='↺ Regenerate';
-    // Add PDF button if not already there
-    const aiBar=btn.closest('.ai-bar');
-    if(!aiBar.querySelector('.pdf-dl-btn')){
-      const pdfBtn=document.createElement('button');
-      pdfBtn.className='ai-btn pdf-dl-btn';
-      pdfBtn.style.cssText='background:var(--surface3);border:1px solid var(--border);color:var(--orange);';
-      pdfBtn.innerHTML='⬇ PDF';
-      pdfBtn.onclick=()=>downloadPDF(gameId);
-      aiBar.querySelector('div:last-child').prepend(pdfBtn);
-    }
-  }catch(e){rc.innerHTML=`<div style="color:var(--loss);padding:12px;font-size:13px;">⚠ Could not generate report. ${e.message}</div>`;}
-  btn.classList.remove('loading');btn.disabled=false;
+    // Re-render the entire report tab so PDF button appears
+    const reportTab = document.getElementById(`tp-report-${gameId}`);
+    if(reportTab) reportTab.innerHTML = buildReport(g);
+  }catch(e){
+    if(rc) rc.innerHTML=`<div style="color:var(--loss);padding:12px;font-size:13px;">⚠ Could not generate report. ${e.message}</div>`;
+  }
+  const newBtn = document.getElementById(`ai-btn-${gameId}`);
+  if(newBtn){ newBtn.classList.remove('loading'); newBtn.disabled=false; }
 }
 
 // ── PLAYER CARDS ─────────────────────────────────────────────────────────────
