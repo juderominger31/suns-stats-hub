@@ -1426,47 +1426,95 @@ async function processLivePDF(file){
   var spinner=document.getElementById('live-spinner');
   if(btn){btn.disabled=true;}
   if(spinner){spinner.style.display='block';}
-
   var statusEl=document.querySelector('.live-status');
   if(statusEl)statusEl.textContent='Reading PDF...';
 
-  var base64=await new Promise(function(res,rej){
-    var r=new FileReader();
-    r.onload=function(){res(r.result.split(',')[1]);};
-    r.onerror=function(){rej(new Error('Read failed'));};
-    r.readAsDataURL(file);
-  });
-
-  var currentQ=liveGame?liveGame.quarters.phx.filter(function(v){return v>0;}).length+1:1;
-
-  var prompt='Read this NBA score sheet PDF and extract stats. This is the score sheet after Q'+currentQ+'. Return ONLY valid JSON: {"opponent":"Full Team Name","oppAbbr":"3-LETTER","quarter":'+currentQ+',"quarters":{"phx":[Q1,Q2,Q3,Q4],"opp":[Q1,Q2,Q3,Q4]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"to":0,"paintPts":0},"players":[{"name":"First Last","pts":0,"reb":0,"ast":0,"fg":"M/A","three":"M/A","pm":0}]}. Use 0 for quarters not yet played. Only include Suns players who played.';
-
   try{
-    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]})});
-    var d=await r.json();
-    var text=d.content.map(function(i){return i.text||'';}).join('').replace(/```json|```/g,'').trim();
-    var parsed=JSON.parse(text);
+    var base64=await new Promise(function(res,rej){
+      var r=new FileReader();
+      r.onload=function(){res(r.result.split(',')[1]);};
+      r.onerror=function(){rej(new Error('Read failed'));};
+      r.readAsDataURL(file);
+    });
 
-    // Merge with existing live game or create new
-    if(!liveGame){
-      liveGame={opponent:parsed.opponent,oppAbbr:parsed.oppAbbr,quarters:{phx:[0,0,0,0],opp:[0,0,0,0]},teamStats:parsed.teamStats||null,players:parsed.players||[]};
+    var currentQ=liveGame?liveGame.quarters.phx.filter(function(v){return v>0;}).length+1:1;
+    if(currentQ>4)currentQ=4;
+
+        var prompt='You are an NBA stats extractor. Read this score sheet PDF. Return ONLY a valid JSON object, no markdown, no explanation. JSON: {"opponent":"Full Team Name","oppAbbr":"3-LETTER","quarters":{"phx":[q1,q2,q3,q4],"opp":[q1,q2,q3,q4]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"to":0,"paintPts":0},"players":[{"name":"First Last","pts":0,"reb":0,"ast":0,"fg":"0/0","three":"0/0","pm":0}]}. Use 0 for unplayed quarters. Suns may be HOME or VISITOR. Only include Suns players who played. Return ONLY the JSON.';
+
+    if(statusEl)statusEl.textContent='Sending to Claude...';
+
+    var resp=await fetch('/.netlify/functions/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        messages:[{role:'user',content:[
+          {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
+          {type:'text',text:prompt}
+        ]}]
+      })
+    });
+
+    var d=await resp.json();
+
+    if(d.error){
+      throw new Error(d.error.message||'API error');
     }
 
-    // Update quarters up to current
+    var rawText=d.content.map(function(i){return i.text||'';}).join('');
+
+    // Clean the response aggressively
+    var cleaned=rawText
+      .replace(/```json/gi,'')
+      .replace(/```/g,'')
+      .trim();
+
+    // Extract just the JSON object if there is extra text
+    var jsonStart=cleaned.indexOf('{');
+    var jsonEnd=cleaned.lastIndexOf('}');
+    if(jsonStart>-1&&jsonEnd>-1){
+      cleaned=cleaned.substring(jsonStart,jsonEnd+1);
+    }
+
+    var parsed=JSON.parse(cleaned);
+
+    // Build or update live game
+    if(!liveGame){
+      liveGame={
+        opponent:parsed.opponent||'Opponent',
+        oppAbbr:parsed.oppAbbr||'OPP',
+        quarters:{phx:[0,0,0,0],opp:[0,0,0,0]},
+        teamStats:null,
+        players:[]
+      };
+    }
+
+    // Update opponent info
+    if(parsed.opponent)liveGame.opponent=parsed.opponent;
+    if(parsed.oppAbbr)liveGame.oppAbbr=parsed.oppAbbr;
+
+    // Update quarters
     if(parsed.quarters){
       for(var i=0;i<4;i++){
-        if(parsed.quarters.phx[i]>0)liveGame.quarters.phx[i]=parsed.quarters.phx[i];
-        if(parsed.quarters.opp[i]>0)liveGame.quarters.opp[i]=parsed.quarters.opp[i];
+        if(parsed.quarters.phx&&parsed.quarters.phx[i]>0)liveGame.quarters.phx[i]=parsed.quarters.phx[i];
+        if(parsed.quarters.opp&&parsed.quarters.opp[i]>0)liveGame.quarters.opp[i]=parsed.quarters.opp[i];
       }
     }
+
     if(parsed.teamStats)liveGame.teamStats=parsed.teamStats;
     if(parsed.players&&parsed.players.length>0)liveGame.players=parsed.players;
     liveGame.lastUpdated=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
     saveLiveGame();
     renderLiveScoreboard();
+    if(statusEl)statusEl.textContent='Updated at '+liveGame.lastUpdated;
+
   }catch(e){
     if(statusEl)statusEl.textContent='Error: '+e.message;
+    console.error('processLivePDF error:',e);
+  }finally{
     if(btn){btn.disabled=false;}
     if(spinner){spinner.style.display='none';}
   }
