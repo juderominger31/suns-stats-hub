@@ -632,23 +632,319 @@ async function generateReport(gameId) {
 function downloadReport(gameId) {
   var g = games.find(function (x) { return x.id === gameId; });
   if (!g) return;
-  var lines = ['PHOENIX SUNS GAME REPORT', g.date + ' | PHX vs ' + g.oppAbbr, (g.result === 'W' ? 'WIN' : 'LOSS') + ' ' + g.sunsScore + '-' + g.oppScore, ''];
-  if (g.report) {
-    if (g.report.summary) lines.push(g.report.summary, '');
-    lines.push('KEY PERFORMERS');
-    (g.report.performers || []).forEach(function (p) { lines.push(p.name + ': ' + p.line, p.note, ''); });
-    lines.push('GAME NOTES');
-    (g.report.notes || []).forEach(function (n) { lines.push('• ' + n); });
-    lines.push('');
+
+  // Load jsPDF from CDN then generate
+  if (typeof window.jspdf === 'undefined') {
+    var script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload = function () { buildPDF(g); };
+    document.head.appendChild(script);
+  } else {
+    buildPDF(g);
   }
-  lines.push('BOX SCORE');
-  (g.players || []).forEach(function (p) { lines.push(p.name + ' | ' + p.pts + ' PTS ' + p.reb + ' REB ' + p.ast + ' AST | FG ' + p.fg + ' | +/-' + p.pm); });
-  var blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = g.id + '_report.txt';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+function buildPDF(g) {
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  var W = 612; // letter width in pt
+  var margin = 48;
+  var contentW = W - margin * 2;
+  var y = 0;
+  var r = g.report || {};
+
+  // ── helpers ──────────────────────────────────────────
+  function setFont(style, size, color) {
+    doc.setFont('helvetica', style || 'normal');
+    doc.setFontSize(size || 10);
+    doc.setTextColor(color || '#1a1a1a');
+  }
+  function drawLine(yPos, color, thickness) {
+    doc.setDrawColor(color || '#dddddd');
+    doc.setLineWidth(thickness || 0.5);
+    doc.line(margin, yPos, W - margin, yPos);
+  }
+  function wrap(text, maxW, size) {
+    doc.setFontSize(size || 10);
+    return doc.splitTextToSize(String(text || ''), maxW);
+  }
+  function addPage() {
+    doc.addPage();
+    y = margin;
+    // footer on new page
+    setFont('normal', 8, '#888888');
+    doc.text('Phoenix Suns · 2025–26 Season Stats Portfolio', margin, 760);
+    setFont('normal', 8, '#888888');
+    doc.text('Page ' + doc.internal.getNumberOfPages(), W - margin, 760, { align: 'right' });
+  }
+  function checkPage(needed) {
+    if (y + needed > 730) addPage();
+  }
+
+  // ── HEADER BLOCK ─────────────────────────────────────
+  // Orange top bar
+  doc.setFillColor('#E56020');
+  doc.rect(0, 0, W, 6, 'F');
+
+  y = 36;
+  // Title
+  setFont('bold', 22, '#1a1a1a');
+  doc.text('GAME REPORT', margin, y);
+  y += 20;
+
+  // Matchup line
+  var resText = (g.result === 'W' ? 'Win' : 'Loss');
+  var matchup = 'Phoenix Suns ' + g.sunsScore + '  •  ' + g.opponent + ' ' + g.oppScore;
+  setFont('normal', 13, '#333333');
+  doc.text(matchup, margin, y);
+  y += 16;
+
+  // Date + location
+  var dateLine = g.date + '  |  ' + (g.location || '');
+  setFont('normal', 9, '#666666');
+  doc.text(dateLine, margin, y);
+  y += 8;
+
+  drawLine(y, '#E56020', 1.5);
+  y += 16;
+
+  // ── GAME SUMMARY ─────────────────────────────────────
+  if (r.summary) {
+    setFont('bold', 11, '#E56020');
+    doc.text('GAME SUMMARY', margin, y);
+    y += 14;
+    var paras = r.summary.split('\n\n');
+    paras.forEach(function(para) {
+      if (!para.trim()) return;
+      setFont('normal', 9.5, '#222222');
+      var wrapped = wrap(para.trim(), contentW, 9.5);
+      checkPage(wrapped.length * 13 + 8);
+      doc.text(wrapped, margin, y);
+      y += wrapped.length * 13 + 6;
+    });
+    y += 4;
+    drawLine(y, '#dddddd', 0.5);
+    y += 14;
+  }
+
+  // ── SCORE BY QUARTER ─────────────────────────────────
+  checkPage(80);
+  setFont('bold', 11, '#E56020');
+  doc.text('SCORE BY QUARTER', margin, y);
+  y += 14;
+
+  var qCols = ['TEAM', 'Q1', 'Q2', 'Q3', 'Q4', 'FINAL'];
+  var qColW = [90, 60, 60, 60, 60, 70];
+  var qX = margin;
+
+  // Header row
+  doc.setFillColor('#f5f5f5');
+  doc.rect(margin, y - 11, contentW, 16, 'F');
+  setFont('bold', 8.5, '#555555');
+  var cx = qX;
+  qCols.forEach(function(col, i) {
+    doc.text(col, cx + (i === 0 ? 4 : qColW[i] / 2), y, { align: i === 0 ? 'left' : 'center' });
+    cx += qColW[i];
+  });
+  y += 5;
+  drawLine(y, '#cccccc', 0.5);
+  y += 12;
+
+  // PHX row
+  var qs = g.quarters || { suns: [0,0,0,0], opp: [0,0,0,0] };
+  var sT = qs.suns.reduce(function(a,v){return a+v;},0);
+  var oT = qs.opp.reduce(function(a,v){return a+v;},0);
+
+  cx = qX;
+  setFont('bold', 9, '#1a1a1a');
+  doc.text('PHX', cx + 4, y);
+  cx += qColW[0];
+  setFont('normal', 9, '#1a1a1a');
+  qs.suns.forEach(function(q, i) {
+    doc.text(String(q), cx + qColW[i+1]/2, y, { align: 'center' });
+    cx += qColW[i+1];
+  });
+  setFont('bold', 9, '#E56020');
+  doc.text(String(sT), cx + qColW[5]/2, y, { align: 'center' });
+  y += 4;
+  drawLine(y, '#eeeeee', 0.3);
+  y += 12;
+
+  // OPP row
+  cx = qX;
+  setFont('bold', 9, '#1a1a1a');
+  doc.text(g.oppAbbr || 'OPP', cx + 4, y);
+  cx += qColW[0];
+  setFont('normal', 9, '#1a1a1a');
+  qs.opp.forEach(function(q, i) {
+    doc.text(String(q), cx + qColW[i+1]/2, y, { align: 'center' });
+    cx += qColW[i+1];
+  });
+  setFont('bold', 9, '#1a1a1a');
+  doc.text(String(oT), cx + qColW[5]/2, y, { align: 'center' });
+  y += 10;
+  drawLine(y, '#dddddd', 0.5);
+  y += 16;
+
+  // ── KEY PERFORMERS ────────────────────────────────────
+  if (r.performers && r.performers.length) {
+    checkPage(60);
+    setFont('bold', 11, '#E56020');
+    doc.text('KEY PERFORMERS', margin, y);
+    y += 6;
+    setFont('bold', 9, '#888888');
+    doc.text('PHOENIX SUNS', margin, y + 8);
+    y += 18;
+
+    r.performers.forEach(function(p) {
+      checkPage(50);
+      // Name and line on same row
+      setFont('bold', 10, '#1a1a1a');
+      doc.text(p.name + '  —  ', margin, y);
+      var nameW = doc.getTextWidth(p.name + '  —  ');
+      setFont('normal', 9.5, '#E56020');
+      doc.text(p.line || '', margin + nameW, y);
+      y += 13;
+      setFont('normal', 9, '#444444');
+      var noteWrapped = wrap(p.note || '', contentW, 9);
+      doc.text(noteWrapped, margin, y);
+      y += noteWrapped.length * 12 + 8;
+      drawLine(y, '#eeeeee', 0.3);
+      y += 10;
+    });
+    y += 4;
+    drawLine(y, '#dddddd', 0.5);
+    y += 16;
+  }
+
+  // ── TEAM STATISTICS ───────────────────────────────────
+  if (g.teamStats) {
+    checkPage(70);
+    setFont('bold', 11, '#E56020');
+    doc.text('TEAM STATISTICS — PHOENIX SUNS', margin, y);
+    y += 16;
+
+    var ts = g.teamStats;
+    var statItems = [
+      [ts.fgPct + '%', 'FG%'],
+      [ts.threePct + '%', '3PT%'],
+      [ts.ftPct + '%', 'FT%'],
+      [ts.reb, 'REB'],
+      [ts.ast, 'AST'],
+      [ts.paintPts, 'PAINT PTS'],
+      [ts.secondChance, '2ND CHANCE'],
+      [ts.fastBreak, 'FAST BREAK']
+    ];
+
+    var statW = contentW / 4;
+    var statH = 36;
+    statItems.forEach(function(item, i) {
+      var col = i % 4;
+      var row = Math.floor(i / 4);
+      var sx = margin + col * statW;
+      var sy = y + row * (statH + 6);
+      checkPage(statH + 10);
+      doc.setFillColor('#fafafa');
+      doc.setDrawColor('#eeeeee');
+      doc.roundedRect(sx + 2, sy - 14, statW - 6, statH, 3, 3, 'FD');
+      setFont('bold', 14, '#E56020');
+      doc.text(String(item[0]), sx + (statW-6)/2 + 2, sy + 4, { align: 'center' });
+      setFont('normal', 7.5, '#888888');
+      doc.text(item[1], sx + (statW-6)/2 + 2, sy + 16, { align: 'center' });
+    });
+    y += Math.ceil(statItems.length / 4) * (statH + 6) + 10;
+    drawLine(y, '#dddddd', 0.5);
+    y += 16;
+  }
+
+  // ── BOX SCORE ─────────────────────────────────────────
+  if (g.players && g.players.length) {
+    checkPage(120);
+    setFont('bold', 11, '#E56020');
+    doc.text('PHOENIX SUNS — BOX SCORE', margin, y);
+    y += 14;
+
+    var bCols = ['PLAYER', 'PTS', 'REB', 'AST', 'STL', 'FG', '3PT', 'FT', '+/-'];
+    var bW =    [130,       34,    34,    34,    34,    44,   44,    44,   36];
+    var bX = margin;
+
+    // Header
+    doc.setFillColor('#f0f0f0');
+    doc.rect(margin, y - 11, contentW, 16, 'F');
+    setFont('bold', 8, '#555555');
+    cx = bX;
+    bCols.forEach(function(col, i) {
+      if (i === 0) {
+        doc.text(col, cx + 4, y);
+      } else {
+        doc.text(col, cx + bW[i]/2, y, { align: 'center' });
+      }
+      cx += bW[i];
+    });
+    y += 5;
+    drawLine(y, '#cccccc', 0.5);
+    y += 12;
+
+    g.players.forEach(function(p, idx) {
+      checkPage(18);
+      if (idx % 2 === 0) {
+        doc.setFillColor('#fafafa');
+        doc.rect(margin, y - 10, contentW, 16, 'F');
+      }
+      cx = bX;
+      setFont('bold', 8.5, '#1a1a1a');
+      doc.text(p.name || '', cx + 4, y);
+      cx += bW[0];
+
+      var pmColor = (p.pm >= 0) ? '#2ECC71' : '#E74C3C';
+      var vals = [p.pts, p.reb, p.ast, p.stl, p.fg, p.three, p.ft];
+      vals.forEach(function(v, i) {
+        setFont(i === 0 ? 'bold' : 'normal', 8.5, i === 0 ? '#E56020' : '#1a1a1a');
+        doc.text(String(v !== undefined ? v : ''), cx + bW[i+1]/2, y, { align: 'center' });
+        cx += bW[i+1];
+      });
+      setFont('bold', 8.5, pmColor);
+      var pmStr = (p.pm > 0 ? '+' : '') + (p.pm || 0);
+      doc.text(pmStr, cx + bW[8]/2, y, { align: 'center' });
+
+      y += 4;
+      drawLine(y, '#eeeeee', 0.3);
+      y += 12;
+    });
+    y += 6;
+  }
+
+  // ── NOTES ─────────────────────────────────────────────
+  if (r.notes && r.notes.length) {
+    checkPage(60);
+    drawLine(y, '#dddddd', 0.5);
+    y += 14;
+    setFont('bold', 11, '#E56020');
+    doc.text('NOTES', margin, y);
+    y += 14;
+    r.notes.forEach(function(note) {
+      checkPage(24);
+      setFont('normal', 9, '#1a1a1a');
+      var noteW = wrap('•  ' + note, contentW - 10, 9);
+      doc.text(noteW, margin, y);
+      y += noteW.length * 12 + 6;
+      drawLine(y, '#eeeeee', 0.3);
+      y += 8;
+    });
+  }
+
+  // ── FOOTER on page 1 ──────────────────────────────────
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    doc.setFillColor('#E56020');
+    doc.rect(0, 768, W, 6, 'F');
+    setFont('normal', 8, '#888888');
+    doc.text('Phoenix Suns · 2025–26 Season Stats Portfolio', margin, 762);
+    doc.text('Page ' + pg + ' of ' + totalPages, W - margin, 762, { align: 'right' });
+  }
+
+  doc.save(g.id + '_GameReport.pdf');
 }
 
 function renderPlayers() {
