@@ -365,8 +365,8 @@ footer span{color:var(--orange);}
     </div>
     <div id="recap-content">
       <div class="card" style="padding:20px;margin-bottom:16px;background:var(--surface2);">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Friday, March 20, 2026 — 6 Games</div>
-        <div style="font-size:13px;color:var(--muted);">Results from last night across the NBA.</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;" id="recap-header">Loading last night's scores...</div>
+        <div style="font-size:13px;color:var(--muted);">Live results from across the NBA — updates every time you open this tab.</div>
       </div>
       <div id="recap-games"></div>
       <div style="margin-top:16px;">
@@ -775,20 +775,62 @@ function renderStandings(){
 }
 
 // ── RECAP ────────────────────────────────────────────────────────────────────
-function renderRecap(){
-  const div=document.getElementById('recap-games');div.innerHTML='';
-  LAST_NIGHT.forEach(g=>{
-    const winner=g.awayScore>g.homeScore?g.away:g.home;
-    const wScore=Math.max(g.awayScore,g.homeScore);
-    const lScore=Math.min(g.awayScore,g.homeScore);
-    const loser=g.awayScore>g.homeScore?g.home:g.away;
-    div.innerHTML+=`<div class="recap-game-row">
-      <div class="recap-teams" style="color:var(--win)">${winner}</div>
-      <div class="recap-score">${wScore}–${lScore}</div>
-      <div class="recap-teams" style="color:var(--muted);font-size:14px">${loser}</div>
-      <div class="recap-note">${g.note}</div>
-    </div>`;
-  });
+let liveGames=[];
+
+async function renderRecap(){
+  const div=document.getElementById('recap-games');
+  const hdr=document.getElementById('recap-header');
+  div.innerHTML='<div class="import-progress-card" style="padding:20px;"><div class="ip-spinner" style="font-size:22px;">&#8635;</div><div class="ip-status" style="font-size:13px;margin-top:8px;">Fetching last night's scores...</div></div>';
+
+  try{
+    const now=new Date();
+    const yesterday=new Date(now);
+    yesterday.setDate(yesterday.getDate()-1);
+    const dateStr=yesterday.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+    const prompt=`List all NBA game results from ${dateStr}. For each game use exactly this format on its own line:
+GAME: [Winner] [WinnerScore]-[LoserScore] [Loser] | [One key stat or storyline]
+Example: GAME: Boston Celtics 115-102 Miami Heat | Jaylen Brown 34 pts led Celtics
+If no games were played write: NO_GAMES
+Only include completed games. Be accurate with scores.`;
+
+    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const text=d.content.map(i=>i.text||'').join('');
+
+    if(text.includes('NO_GAMES')){
+      div.innerHTML='<div class="empty"><div class="empty-icon">&#127936;</div>No NBA games were played last night.</div>';
+      if(hdr)hdr.textContent=dateStr+' — No Games';
+      return;
+    }
+
+    const lines=text.split('
+').filter(l=>l.trim().startsWith('GAME:'));
+    liveGames=lines.map(l=>{
+      const clean=l.replace('GAME:','').trim();
+      const parts=clean.split('|');
+      return{scorePart:parts[0]?parts[0].trim():'',note:parts[1]?parts[1].trim():''};
+    }).filter(g=>g.scorePart);
+
+    if(hdr)hdr.textContent=dateStr+' — '+liveGames.length+' Game'+(liveGames.length!==1?'s':'');
+
+    if(liveGames.length===0){
+      div.innerHTML='<div class="report-panel" style="margin:0;"><p>'+text.replace(/
+/g,'<br>')+'</p></div>';
+      return;
+    }
+
+    div.innerHTML='';
+    liveGames.forEach(g=>{
+      div.innerHTML+=`<div class="recap-game-row">
+        <div style="flex:2;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--text)">${g.scorePart}</div>
+        <div class="recap-note">${g.note}</div>
+      </div>`;
+    });
+
+  }catch(e){
+    div.innerHTML='<div style="color:var(--loss);padding:16px;font-size:13px;">&#9888; Could not fetch scores: '+e.message+'</div>';
+  }
 }
 
 async function generateRecap(){
@@ -796,17 +838,37 @@ async function generateRecap(){
   btn.classList.add('loading');btn.disabled=true;
   const reportDiv=document.getElementById('recap-report');
   reportDiv.style.display='block';
-  reportDiv.innerHTML=`<div class="import-progress-card"><div class="ip-spinner">⟳</div><div class="ip-status">Generating recap…</div><div class="ip-sub">Claude is analyzing last night's games</div></div>`;
-  const gameList=LAST_NIGHT.map(g=>`${g.awayScore>g.homeScore?g.away:g.home} ${Math.max(g.awayScore,g.homeScore)}–${Math.min(g.awayScore,g.homeScore)} ${g.awayScore>g.homeScore?g.home:g.away} · ${g.note}`).join('\n');
-  const prompt=`You are an NBA analyst. Write a punchy, engaging nightly recap for March 20, 2026. These were the 6 games:\n${gameList}\n\nWrite 3-4 sentences per game in ESPN style. Highlight the biggest storyline, star performer, and key stat. End with a "Game of the Night" pick and a one-line reason. Keep the whole thing under 400 words. No JSON, just plain text with game headers like "**DET 115, GSW 101**".`;
+  reportDiv.innerHTML='<div class="import-progress-card"><div class="ip-spinner">&#8635;</div><div class="ip-status">Generating recap…</div><div class="ip-sub">Claude is analyzing last night's games</div></div>';
+
+  const now=new Date();
+  const yesterday=new Date(now);
+  yesterday.setDate(yesterday.getDate()-1);
+  const dateStr=yesterday.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+  const gameList=liveGames.length>0
+    ?liveGames.map(g=>g.scorePart+' — '+g.note).join('
+')
+    :'Write about the most recent NBA games you know about.';
+
+  const prompt=`You are an NBA analyst writing a nightly recap for ${dateStr}.
+${liveGames.length>0?'Here are last night's results:
+'+gameList:'Write about the most recent NBA games you know about.'}
+
+Write 2-3 punchy ESPN-style sentences per game. Highlight the star performer and one key stat.
+End with a GAME OF THE NIGHT section — pick the best game and explain why in one sentence.
+Keep it under 500 words. Plain text only. Bold game headers like **TEAM A 110, TEAM B 98**.`;
+
   try{
-    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     const text=d.content.map(i=>i.text||'').join('');
-    reportDiv.innerHTML=`<div class="report-panel"><h3>Full Recap — March 20, 2026<span class="gen-badge">✓ AI Generated</span></h3>${text.split('\n').map(l=>l.trim()?`<p>${l.replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--orange)">$1</strong>')}</p>`:'').join('')}</div>`;
-  }catch(e){reportDiv.innerHTML=`<div style="color:var(--loss);padding:12px;font-size:13px;">⚠ Could not generate recap. ${e.message}</div>`;}
+    reportDiv.innerHTML='<div class="report-panel"><h3>NBA Nightly Recap <span class="gen-badge">&#10003; AI Generated</span></h3>'+text.split('
+').map(l=>l.trim()?'<p>'+l.replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--orange)">$1</strong>')+'</p>':'').join('')+'</div>';
+  }catch(e){
+    reportDiv.innerHTML='<div style="color:var(--loss);padding:12px;font-size:13px;">&#9888; Could not generate recap. '+e.message+'</div>';
+  }
   btn.classList.remove('loading');btn.disabled=false;
-  btn.querySelector('span').textContent='↺ Regenerate';
+  btn.querySelector('span').textContent='&#x21BA; Regenerate';
 }
 
 // ── PDF UPLOAD PIPELINE ──────────────────────────────────────────────────────
