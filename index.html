@@ -1042,12 +1042,374 @@ function showUploadError(msg){
   s3.style.display='block';
 }
 
+function resetUpload(){
+  document.getElementById('upload-step-1').style.display='block';
+  document.getElementById('upload-step-2').style.display='none';
+  document.getElementById('upload-step-3').style.display='none';
+  document.getElementById('upload-step-3').innerHTML='';
+  document.getElementById('file-input').value='';
+  setProgress(0,'Reading PDF...','Sending to Claude AI');
+}
+
+// ── HERO UPDATE ──────────────────────────────────────────────────────────────
+function updateHero(){
+  document.getElementById('h-games').textContent=games.length;
+  if(!games.length)return;
+  document.getElementById('h-ppg').textContent=(games.reduce((s,g)=>s+g.sunsScore,0)/games.length).toFixed(1);
+  const agg={};games.forEach(g=>g.players.forEach(p=>{agg[p.name]=(agg[p.name]||0)+p.pts;}));
+  const top=Object.entries(agg).sort((a,b)=>b[1]-a[1])[0];
+  if(top)document.getElementById('h-top').textContent=top[0].split(' ').slice(-1)[0];
+  const last=games[0];
+  const streak=games.reduce((s,g,i)=>{if(i===0)return{r:g.result,n:1};if(g.result===s.r)return{r:s.r,n:s.n+1};return s;},{r:'',n:0});
+  const streakEl=document.getElementById('h-streak');
+  streakEl.textContent=(streak.r==='W'?'W':'L')+streak.n;
+  streakEl.style.color=streak.r==='W'?'var(--win)':'var(--loss)';
+}
+
+// ── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+function downloadPDF(gameId) {
+  const g = games.find(x => x.id === gameId);
+  if (!g || !g.report) return;
+
+  // Build a clean printable HTML page
+  const r = g.report;
+  const ts = g.teamStats;
+  const maxPts = Math.max(...g.players.map(p => p.pts));
+
+  const playerRows = g.players.map(p => `
+    <tr>
+      <td style="text-align:left;font-weight:600;">${p.name} <span style="background:#eee;color:#555;font-size:9px;padding:1px 5px;border-radius:2px;">${p.pos}</span></td>
+      <td>${p.pts}</td><td>${p.reb}</td><td>${p.ast}</td><td>${p.stl}</td>
+      <td>${p.fg}</td><td>${p.three}</td><td>${p.ft}</td>
+      <td style="color:${p.pm>0?'#1E7A3E':p.pm<0?'#C0392B':'#888'}">${p.pm>0?'+':''}${p.pm}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Game Report - PHX vs ${g.oppAbbr} ${g.date}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; color: #111; background: #fff; padding: 40px; font-size: 13px; line-height: 1.6; }
+  .title-block { border-bottom: 3px solid #1A3A5C; padding-bottom: 14px; margin-bottom: 20px; }
+  .main-title { font-size: 28px; font-weight: 900; color: #1A3A5C; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .main-title span { color: #E56020; }
+  .subtitle { font-size: 13px; color: #666; }
+  .section-hdr { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #E56020; border-bottom: 2px solid #E56020; padding-bottom: 6px; margin: 22px 0 12px; }
+  p { margin-bottom: 9px; color: #333; font-size: 13px; }
+  .performer { background: #f8f8f8; border-left: 4px solid #E56020; padding: 10px 14px; margin-bottom: 8px; border-radius: 0 4px 4px 0; }
+  .performer-name { font-weight: 900; font-size: 14px; color: #1A3A5C; }
+  .performer-line { color: #E56020; font-weight: 700; font-size: 12px; margin: 3px 0; }
+  .performer-note { color: #555; font-size: 12px; }
+  .note-item { margin-bottom: 6px; font-size: 12px; color: #333; }
+  .note-item::before { content: "• "; color: #E56020; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  th { background: #1A3A5C; color: #fff; padding: 7px 8px; text-align: center; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  th:first-child { text-align: left; }
+  td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  td:first-child { text-align: left; }
+  tr:last-child td { background: #fff3e8; color: #E56020; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qtr-table th { background: #1A3A5C; }
+  .team-stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 10px; }
+  .ts-box { background: #f5f5f5; border-radius: 4px; padding: 10px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ts-val { font-size: 20px; font-weight: 900; color: #E56020; }
+  .ts-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-top: 2px; }
+  .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; text-align: center; }
+  @media print { body { padding: 20px; } }
+
+/* ── LIVE GAME SCOREBOARD ── */
+.live-scoreboard{background:linear-gradient(135deg,#1D1160 0%,#0A0A0F 100%);border:2px solid var(--orange);border-radius:var(--radius-lg);padding:24px 28px;margin-bottom:0;position:relative;overflow:hidden;}
+.live-scoreboard::before{content:"LIVE";position:absolute;right:20px;top:16px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:11px;letter-spacing:3px;color:var(--orange);animation:livepulse 1.5s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.live-scoreboard.not-live::before{content:"FINAL";animation:none;color:var(--muted);}
+.live-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+.live-teams{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;}
+.live-team{text-align:center;flex:1;}
+.live-team-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.live-team-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:64px;line-height:1;color:var(--orange);}
+.live-team-score.opp{color:#fff;}
+.live-vs{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--muted);}
+.live-qtrs{display:flex;gap:0;border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;}
+.live-qtr{flex:1;text-align:center;padding:8px 4px;border-right:1px solid var(--border2);}
+.live-qtr:last-child{border-right:none;}
+.live-qtr.active-q{background:rgba(229,96,32,.15);}
+.live-qtr-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.live-qtr-scores{display:flex;flex-direction:column;gap:2px;}
+.live-qtr-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;}
+.live-qtr-val.phx{color:var(--orange);}
+.live-qtr-val.opp{color:#888;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.live-stat-box{background:rgba(255,255,255,.04);border-radius:var(--radius);padding:10px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;color:var(--orange);}
+.live-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.live-upload-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.live-upload-btn{background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 18px;border-radius:var(--radius);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.live-upload-btn:hover{background:#cf551a;}
+.live-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.live-upload-note{font-size:11px;color:var(--muted);}
+.live-status{font-size:12px;color:var(--win);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;}
+.live-player-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;}
+.live-player-tbl th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-tbl th:first-child{text-align:left;}
+.live-player-tbl td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-tbl td:first-child{text-align:left;font-weight:600;color:#ddd;}
+.live-no-game{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-setup-btn{background:none;border:1px dashed var(--border2);color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:var(--radius);transition:all .2s;width:100%;}
+.live-setup-btn:hover{border-color:var(--orange);color:var(--orange);}
+#live-file-input{display:none;}
+
+/* ── LIVE SCOREBOARD ── */
+.live-board{background:var(--surface);border:2px solid var(--orange);border-radius:var(--radius-lg);overflow:hidden;margin-top:28px;}
+.live-board-header{background:var(--orange);padding:10px 18px;display:flex;align-items:center;justify-content:space-between;}
+.live-board-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:15px;letter-spacing:2px;text-transform:uppercase;color:#fff;}
+.live-badge{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#fff;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(0.8);}}
+.live-board-body{padding:16px 18px;}
+.live-score-row{display:grid;grid-template-columns:1fr 60px 60px 60px 60px 80px;gap:8px;align-items:center;margin-bottom:6px;}
+.live-score-row.hdr div{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center;}
+.live-score-row.hdr div:first-child{text-align:left;}
+.live-team{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;}
+.live-q{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;text-align:center;color:var(--text);}
+.live-q.empty{color:var(--muted2);}
+.live-total{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;text-align:center;color:var(--orange);}
+.live-divider{height:1px;background:var(--border);margin:10px 0;}
+.live-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px;}
+.live-stat-box{background:var(--surface2);border-radius:var(--radius);padding:8px;text-align:center;}
+.live-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;color:var(--orange);}
+.live-stat-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+.live-upload-bar{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.live-upload-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);flex:1;}
+.live-upload-label span{color:var(--orange);}
+.live-btn{background:var(--surface2);border:1px solid var(--border);color:var(--orange);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:7px 16px;border-radius:var(--radius);transition:all .2s;white-space:nowrap;}
+.live-btn:hover{background:rgba(229,96,32,.15);border-color:var(--orange);}
+.live-btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
+.live-btn.primary:hover{background:#cf551a;}
+.live-player-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px;}
+.live-player-table th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:5px 7px;text-align:center;border-bottom:1px solid var(--border);}
+.live-player-table th:first-child{text-align:left;}
+.live-player-table td{padding:6px 7px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:11px;}
+.live-player-table td:first-child{text-align:left;font-weight:600;}
+.live-player-table tr:last-child td{background:rgba(229,96,32,.07);font-weight:700;color:var(--orange);}
+#live-file-input{display:none;}
+.live-processing{text-align:center;padding:20px;color:var(--muted);font-size:13px;}
+.live-tabs{display:flex;gap:4px;margin:10px 0;}
+.live-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.live-tab.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+.delete-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:4px;transition:all .2s;line-height:1;}
+.delete-btn:hover{color:var(--loss);background:rgba(231,76,60,.1);}
+</style>
+</head>
+<body>
+  <div class="title-block">
+    <div class="main-title">GAME REPORT — <span>PHX ${g.sunsScore}</span> · ${g.oppAbbr} ${g.oppScore}</div>
+    <div class="subtitle">${g.date} · ${g.location} · ${g.homeAway} · Attendance: ${g.attendance} · Duration: ${g.duration}</div>
+  </div>
+
+  <div class="section-hdr">Game Summary</div>
+  ${r.summary.split('\n\n').map(para => `<p>${para}</p>`).join('')}
+
+  <div class="section-hdr">Score by Quarter</div>
+  <table class="qtr-table">
+    <thead><tr><th>Team</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Final</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:700;">Phoenix Suns</td><td>${g.quarters.suns[0]}</td><td>${g.quarters.suns[1]}</td><td>${g.quarters.suns[2]}</td><td>${g.quarters.suns[3]}</td><td style="font-weight:900;color:${g.result==='W'?'#1E7A3E':'#C0392B'}">${g.sunsScore}</td></tr>
+      <tr><td style="font-weight:700;">${g.opponent}</td><td>${g.quarters.opp[0]}</td><td>${g.quarters.opp[1]}</td><td>${g.quarters.opp[2]}</td><td>${g.quarters.opp[3]}</td><td style="font-weight:900;color:${g.result==='L'?'#1E7A3E':'#C0392B'}">${g.oppScore}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Key Performers — Phoenix Suns</div>
+  ${r.performers.map(p => `<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`).join('')}
+
+  <div class="section-hdr">Box Score — Phoenix Suns</div>
+  <table>
+    <thead><tr><th>Player</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>FG</th><th>3PT</th><th>FT</th><th>+/-</th></tr></thead>
+    <tbody>
+      ${playerRows}
+      <tr><td>TOTALS</td><td>${g.sunsScore}</td><td>${ts.reb}</td><td>${ts.ast}</td><td>${ts.stl}</td><td>${ts.fgPct}%</td><td>${ts.threePct}%</td><td>${ts.ftPct}%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Team Statistics</div>
+  <div class="team-stats-grid">
+    ${[['FG%',ts.fgPct+'%'],['3PT%',ts.threePct+'%'],['FT%',ts.ftPct+'%'],['REB',ts.reb],['AST',ts.ast],['Paint Pts',ts.paintPts],['2nd Chance',ts.secondChance],['Fast Break',ts.fastBreak],['TO',ts.to],['STL',ts.stl]].map(([l,v])=>`<div class="ts-box"><div class="ts-val">${v}</div><div class="ts-lbl">${l}</div></div>`).join('')}
+  </div>
+
+  <div class="section-hdr">Notes</div>
+  ${r.notes.map(n => `<div class="note-item">${n}</div>`).join('')}
+
+  <div class="footer">Phoenix Suns · 2025–26 Season Stats Hub · ${g.date} · PHX vs ${g.oppAbbr}</div>
+</body>
+</html>`;
+
+  // Open in new window and trigger print dialog
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => {
+      win.print();
+    }, 500);
+  };
+}
+
+// ── LIVE GAME TRACKER ────────────────────────────────────────────────────────
+var LIVE_KEY='suns_live_game_v1';
+var liveGame=null;
+
+function loadLiveGame(){
+  try{var r=localStorage.getItem(LIVE_KEY);if(r)liveGame=JSON.parse(r);}catch(e){}
+}
+
+function saveLiveGame(){
+  try{localStorage.setItem(LIVE_KEY,JSON.stringify(liveGame));}catch(e){}
+}
+
+function clearLiveGame(){
+  liveGame=null;
+  try{localStorage.removeItem(LIVE_KEY);}catch(e){}
+  renderLiveScoreboard();
+}
+
+function updateLiveQuarter(){
+  if(!liveGame)return;
+  var q=parseInt(document.getElementById('live-q-select').value)-1;
+  var phx=parseInt(document.getElementById('live-phx-score').value)||0;
+  var opp=parseInt(document.getElementById('live-opp-score').value)||0;
+  liveGame.quarters.phx[q]=phx;
+  liveGame.quarters.opp[q]=opp;
+  // Update player stats if entered
+  var fgPct=parseFloat(document.getElementById('live-fg-pct').value)||0;
+  var threePct=parseFloat(document.getElementById('live-three-pct').value)||0;
+  var reb=parseInt(document.getElementById('live-reb').value)||0;
+  var ast=parseInt(document.getElementById('live-ast').value)||0;
+  liveGame.teamStats={fgPct:fgPct,threePct:threePct,ftPct:0,reb:reb,ast:ast,to:0,paintPts:0};
+  liveGame.lastUpdated=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  saveLiveGame();
+  renderLiveScoreboard();
+}
+
+function startNewLiveGame(){
+  var opp=document.getElementById('live-opp-input').value.trim();
+  var abbr=document.getElementById('live-abbr-input').value.trim().toUpperCase();
+  if(!opp||!abbr){alert('Please enter opponent name and abbreviation.');return;}
+  liveGame={opponent:opp,oppAbbr:abbr,quarters:{phx:[0,0,0,0],opp:[0,0,0,0]},teamStats:null,players:[],lastUpdated:''};
+  saveLiveGame();
+  renderLiveScoreboard();
+}
+
+function renderLiveScoreboard(){
+  var wrap=document.getElementById('live-scoreboard-wrap');
+  if(!wrap)return;
+
+  if(!liveGame){
+    wrap.innerHTML='<div style="padding:16px 0;">'+
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;">&#9728; Start Live Game Tracking</div>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">'+
+        '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Opponent</div><input id="live-opp-input" placeholder="e.g. Golden State Warriors" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:Barlow,sans-serif;font-size:13px;padding:8px 12px;border-radius:var(--radius);width:240px;"></div>'+
+        '<div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Abbr</div><input id="live-abbr-input" placeholder="GSW" maxlength="3" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:Barlow,sans-serif;font-size:13px;padding:8px 12px;border-radius:var(--radius);width:80px;text-transform:uppercase;"></div>'+
+        '<button onclick="startNewLiveGame()" style="background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:9px 20px;border-radius:var(--radius);">Start Tracking</button>'+
+      '</div>'+
+    '</div>';
+    return;
+  }
+
+  var g=liveGame;
+  var phxTotal=g.quarters.phx.reduce(function(a,b){return a+b;},0);
+  var oppTotal=g.quarters.opp.reduce(function(a,b){return a+b;},0);
+  var currentQ=g.quarters.phx.filter(function(v){return v>0;}).length;
+  var isFinal=currentQ>=4;
+
+  // Quarter cells
+  var qtrHTML='';
+  ['Q1','Q2','Q3','Q4'].forEach(function(q,i){
+    var isActive=i===currentQ&&!isFinal;
+    qtrHTML+='<div class="live-qtr'+(isActive?' active-q':'')+'">';
+    qtrHTML+='<div class="live-qtr-lbl">'+q+'</div>';
+    qtrHTML+='<div class="live-qtr-scores">';
+    qtrHTML+='<div class="live-qtr-val phx">'+(g.quarters.phx[i]||'-')+'</div>';
+    qtrHTML+='<div class="live-qtr-val opp">'+(g.quarters.opp[i]||'-')+'</div>';
+    qtrHTML+='</div></div>';
+  });
+
+  // Team stats
+  var tsHTML='';
+  if(g.teamStats&&g.teamStats.fgPct>0){
+    [['FG%',g.teamStats.fgPct+'%'],['3PT%',g.teamStats.threePct+'%'],['REB',g.teamStats.reb],['AST',g.teamStats.ast]].forEach(function(s){
+      tsHTML+='<div class="live-stat-box"><div class="live-stat-val">'+s[1]+'</div><div class="live-stat-lbl">'+s[0]+'</div></div>';
+    });
+  }
+
+  // Quick entry form
+  var nextQ=Math.min(currentQ+1,4);
+  var entryForm='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">'+
+    '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Update Score</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Quarter</div>'+
+        '<select id="live-q-select" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:7px 10px;border-radius:var(--radius);">'+
+          '<option value="1"'+(nextQ===1?' selected':'')+'>Q1</option>'+
+          '<option value="2"'+(nextQ===2?' selected':'')+'>Q2</option>'+
+          '<option value="3"'+(nextQ===3?' selected':'')+'>Q3</option>'+
+          '<option value="4"'+(nextQ===4?' selected':'')+'>Q4</option>'+
+        '</select></div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">PHX</div>'+
+        '<input id="live-phx-score" type="number" min="0" max="60" placeholder="0" style="background:var(--surface2);border:1px solid var(--orange);color:var(--orange);font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:20px;padding:5px 10px;border-radius:var(--radius);width:70px;text-align:center;"></div>'+
+      '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:18px;color:var(--muted);padding-bottom:6px;">–</div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">'+g.oppAbbr+'</div>'+
+        '<input id="live-opp-score" type="number" min="0" max="60" placeholder="0" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:20px;padding:5px 10px;border-radius:var(--radius);width:70px;text-align:center;"></div>'+
+      '<div style="width:1px;background:var(--border2);height:36px;margin-bottom:2px;"></div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">FG%</div>'+
+        '<input id="live-fg-pct" type="number" min="0" max="100" step="0.1" placeholder="0.0" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:7px 8px;border-radius:var(--radius);width:70px;"></div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">3PT%</div>'+
+        '<input id="live-three-pct" type="number" min="0" max="100" step="0.1" placeholder="0.0" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:7px 8px;border-radius:var(--radius);width:70px;"></div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">REB</div>'+
+        '<input id="live-reb" type="number" min="0" placeholder="0" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:7px 8px;border-radius:var(--radius);width:60px;"></div>'+
+      '<div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600;letter-spacing:1px;text-transform:uppercase;">AST</div>'+
+        '<input id="live-ast" type="number" min="0" placeholder="0" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:13px;padding:7px 8px;border-radius:var(--radius);width:60px;"></div>'+
+      '<button onclick="updateLiveQuarter()" style="background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:9px 18px;border-radius:var(--radius);margin-bottom:2px;">Update</button>'+
+      '<button onclick="if(confirm(\'Clear live game?\'))clearLiveGame()" style="background:var(--surface3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:9px 14px;border-radius:var(--radius);margin-bottom:2px;">Clear</button>'+
+      (g.lastUpdated?'<span style="font-size:11px;color:var(--win);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;">Updated '+g.lastUpdated+'</span>':'')+
+    '</div></div>';
+
+  wrap.innerHTML='<div class="live-scoreboard'+(isFinal?' not-live':'')+'">'+
+    '<div class="live-title">&#9728; PHX Suns '+(isFinal?'FINAL':'LIVE Q'+nextQ)+' vs '+g.opponent+'</div>'+
+    '<div class="live-teams">'+
+      '<div class="live-team"><div class="live-team-name">PHX Suns</div><div class="live-team-score">'+phxTotal+'</div></div>'+
+      '<div class="live-vs">VS</div>'+
+      '<div class="live-team"><div class="live-team-name">'+g.oppAbbr+'</div><div class="live-team-score opp">'+oppTotal+'</div></div>'+
+    '</div>'+
+    '<div class="live-qtrs">'+qtrHTML+'</div>'+
+    (tsHTML?'<div class="live-stats-grid">'+tsHTML+'</div>':'')+
+    entryForm+
+  '</div>';
+}
+
+// ── PDF UPLOAD PIPELINE ──────────────────────────────────────────────────────
+const uz=document.getElementById('upload-zone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=Array.from(e.dataTransfer.files).find(f=>f.name.endsWith('.pdf'));if(f)processPDF(f);else showUploadError('Please drop a PDF file.');});
+document.getElementById('file-input').addEventListener('change',e=>{if(e.target.files[0])processPDF(e.target.files[0]);});
+
+function setProgress(pct,status,sub){
+  document.getElementById('progress-fill').style.width=pct+'%';
+  if(status)document.getElementById('ip-status').textContent=status;
+  if(sub)document.getElementById('ip-sub').textContent=sub;
+}
+
+function showUploadError(msg){
+  document.getElementById('upload-step-1').style.display='block';
+  document.getElementById('upload-step-2').style.display='none';
+  const s3=document.getElementById('upload-step-3');
+  s3.innerHTML=`<div style="margin-top:12px;background:var(--surface);border:1px solid var(--loss);border-radius:var(--radius-lg);padding:14px 18px;color:var(--loss);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;">⚠ ${msg}</div>`;
+  s3.style.display='block';
+}
+
 async function processPDF(file){
   if(window.location.protocol==='file:'){
-    document.getElementById('upload-step-3').innerHTML=`<div style="background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:22px 26px;margin-top:0;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:17px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">ℹ One extra step</div>
-      <div style="font-size:13px;color:#ccc;line-height:1.7;">Your browser blocks AI connections when opening HTML files locally. <strong style="color:#fff">Host this file online</strong> (Netlify, GitHub Pages — both free) and the upload will work end-to-end automatically.<br><br>Or drop the PDF in the Claude chat — I'll process it and update this file in seconds.</div>
-    </div>`;
+    document.getElementById('upload-step-3').innerHTML='<div style="background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:22px 26px;margin-top:0;"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:17px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">One extra step</div><div style="font-size:13px;color:#ccc;line-height:1.7;">Host this file on Netlify for the PDF upload to work.</div></div>';
     document.getElementById('upload-step-3').style.display='block';
     return;
   }
@@ -1055,53 +1417,71 @@ async function processPDF(file){
   document.getElementById('upload-step-3').style.display='none';
   document.getElementById('upload-step-2').style.display='block';
   setProgress(8,'Reading PDF...','Preparing for Claude AI');
-  const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);});
+
+  var base64=await new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(',')[1]);};
+    r.onerror=function(){rej(new Error('Read failed'));};
+    r.readAsDataURL(file);
+  });
+
   setProgress(22,'Sending to Claude...','Extracting stats from box score');
-  const ep=`You are an NBA stats extractor. Read this NBA Official Scorer's Report PDF and extract ALL data precisely. Respond ONLY with valid JSON — no markdown, no explanation.
-Return: {"date":"Mon DD, YYYY","opponent":"Full Name","oppAbbr":"3-LETTER","location":"Arena, City, ST","homeAway":"Home or Away","sunsScore":0,"oppScore":0,"result":"W or L","attendance":"00,000","duration":"H:MM","quarters":{"suns":[Q1,Q2,Q3,Q4],"opp":[Q1,Q2,Q3,Q4]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"paintPts":0,"secondChance":0,"fastBreak":0},"players":[{"name":"First Last","pos":"F","num":"0","min":"MM:SS","pts":0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"fg":"M/A","three":"M/A","ft":"M/A","pm":0}]}
-Suns may be VISITOR or HOME. Only include players who played (skip DNP).`;
-  let gd;
+
+  var ep='You are an NBA stats extractor. Read this NBA Official Scorer Report PDF carefully and extract all data. Return ONLY a valid JSON object with no markdown, no backticks, no explanation. Start directly with { and end with }. JSON format: {"date":"Mon DD, YYYY","opponent":"Full Name","oppAbbr":"3-LETTER","location":"Arena, City, ST","homeAway":"Home or Away","sunsScore":0,"oppScore":0,"result":"W or L","attendance":"00,000","duration":"H:MM","quarters":{"suns":[0,0,0,0],"opp":[0,0,0,0]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"paintPts":0,"secondChance":0,"fastBreak":0},"players":[{"name":"First Last","pos":"F","num":"0","min":"MM:SS","pts":0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"fg":"0/0","three":"0/0","ft":"0/0","pm":0}]}. Suns may be VISITOR or HOME. Only include players who played, skip DNP. Return ONLY the JSON nothing else.';
+
+  var gd;
   try{
-    const r1=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:ep}]}]})});
-    const d1=await r1.json();
-    const raw1=d1.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
-    const json1Start=raw1.indexOf('{'); const json1End=raw1.lastIndexOf('}')+1;
-    gd=JSON.parse(raw1.slice(json1Start,json1End));
-  }catch(e){showUploadError('Could not read this PDF. Make sure it is an NBA Official Scorer\'s Report. ('+e.message+')');document.getElementById('upload-step-2').style.display='none';document.getElementById('upload-step-1').style.display='block';return;}
+    var r1=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:ep}]}]})});
+    var d1=await r1.json();
+    if(d1.error){throw new Error(d1.error.message||'API error');}
+    var raw1=d1.content.map(function(i){return i.text||'';}).join('');
+    var clean1=raw1.replace(/```json/gi,'').replace(/```/g,'').trim();
+    var s1=clean1.indexOf('{');
+    var e1=clean1.lastIndexOf('}');
+    if(s1<0||e1<0){throw new Error('No JSON found in response');}
+    gd=JSON.parse(clean1.slice(s1,e1+1));
+  }catch(e){
+    showUploadError('Could not read this PDF. Make sure it is an NBA Official Scorer's Report. ('+e.message+')');
+    document.getElementById('upload-step-2').style.display='none';
+    document.getElementById('upload-step-1').style.display='block';
+    return;
+  }
+
   setProgress(55,'Stats extracted!','Generating game report...');
-  const gid='PHX-'+gd.oppAbbr+'-'+gd.date.replace(/[^0-9]/g,'');
-  if(games.find(g=>g.id===gid)){showUploadError('This game ('+gd.date+' vs '+gd.opponent+') is already in your portfolio.');document.getElementById('upload-step-2').style.display='none';document.getElementById('upload-step-1').style.display='block';return;}
-  const rp=`You are a professional NBA game reporter. Generate a structured game report for this Phoenix Suns game. Respond ONLY with valid JSON — no markdown.
-GAME: Suns (${gd.sunsScore}) vs ${gd.opponent} (${gd.oppScore}) — Suns ${gd.result==='W'?'WIN':'LOSS'} | ${gd.homeAway} at ${gd.location} | ${gd.date}
-Quarters — Suns: ${gd.quarters.suns.join('-')} | Opp: ${gd.quarters.opp.join('-')}
-Team: FG ${gd.teamStats.fgPct}% | 3PT ${gd.teamStats.threePct}% | FT ${gd.teamStats.ftPct}% | REB ${gd.teamStats.reb} | AST ${gd.teamStats.ast} | Paint ${gd.teamStats.paintPts} | TO ${gd.teamStats.to}
-Players: ${gd.players.map(p=>`${p.name}: ${p.pts}pts ${p.reb}reb ${p.ast}ast FG ${p.fg} +/-${p.pm}`).join(' | ')}
-Return: {"summary":"Two paragraph ESPN-style narrative separated by \\n\\n","performers":[{"name":"","line":"XX PTS · XX REB · FG · +/-","note":"1-2 sentences"}],"notes":["stat note 1","stat note 2","stat note 3"]}`;
-  let report=null;
+  var gid='PHX-'+gd.oppAbbr+'-'+(gd.date||'').replace(/[^0-9]/g,'');
+  if(games.find(function(g){return g.id===gid;})){
+    showUploadError('This game ('+gd.date+' vs '+gd.opponent+') is already in your portfolio.');
+    document.getElementById('upload-step-2').style.display='none';
+    document.getElementById('upload-step-1').style.display='block';
+    return;
+  }
+
+  var rpPrompt='You are a professional NBA game reporter. Generate a structured game report for this Phoenix Suns game. Respond ONLY with valid JSON, no markdown, no backticks, no extra text. Game: Suns '+gd.sunsScore+' vs '+gd.opponent+' '+gd.oppScore+' - Suns '+(gd.result==='W'?'WIN':'LOSS')+' - '+gd.homeAway+' at '+gd.location+' - '+gd.date+'. Quarters Suns: '+gd.quarters.suns.join('-')+' Opp: '+gd.quarters.opp.join('-')+'. Team: FG '+gd.teamStats.fgPct+'% 3PT '+gd.teamStats.threePct+'% FT '+gd.teamStats.ftPct+'% REB '+gd.teamStats.reb+' AST '+gd.teamStats.ast+' Paint '+gd.teamStats.paintPts+' TO '+gd.teamStats.to+'. Players: '+gd.players.map(function(p){return p.name+': '+p.pts+'pts '+p.reb+'reb '+p.ast+'ast FG '+p.fg+' +/-'+p.pm;}).join(', ')+'. Return: {"summary":"Two paragraph ESPN-style narrative separated by two newlines","performers":[{"name":"","line":"XX PTS XX REB XX AST FG +/-","note":"1-2 sentences"}],"notes":["note1","note2","note3"]}';
+
+  var report=null;
   try{
     setProgress(72,'Writing report...','Claude is analyzing the game');
-    const r2=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:rp}]})});
-    const d2=await r2.json();
-    const raw2=d2.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
-    const json2Start=raw2.indexOf('{'); const json2End=raw2.lastIndexOf('}')+1;
-    report=JSON.parse(raw2.slice(json2Start,json2End));
+    var r2=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:rpPrompt}]})});
+    var d2=await r2.json();
+    var raw2=d2.content.map(function(i){return i.text||'';}).join('');
+    var clean2=raw2.replace(/```json/gi,'').replace(/```/g,'').trim();
+    var s2=clean2.indexOf('{');
+    var e2=clean2.lastIndexOf('}');
+    if(s2>=0&&e2>=0){report=JSON.parse(clean2.slice(s2,e2+1));}
   }catch(e){report=null;}
+
   setProgress(95,'Saving to portfolio...');
-  await new Promise(r=>setTimeout(r,400));
-  const ng={...gd,id:gid,report};
+  await new Promise(function(r){setTimeout(r,400);});
+  var ng=Object.assign({},gd,{id:gid,report:report});
   games.unshift(ng);save(games);
   setProgress(100,'Done!','');
-  await new Promise(r=>setTimeout(r,500));
+  await new Promise(function(r){setTimeout(r,500);});
   document.getElementById('upload-step-2').style.display='none';
-  const rc=ng.result==='W'?'var(--win)':'var(--loss)';
-  document.getElementById('upload-step-3').innerHTML=`<div class="success-card">
-    <div><div class="success-title">✓ Game Added!</div>
-    <div class="success-sub">${ng.date} · PHX vs ${ng.oppAbbr} · <span style="color:${rc};font-weight:700">${ng.result==='W'?'WIN':'LOSS'} ${ng.sunsScore}–${ng.oppScore}</span> · ${report?'Report generated':'Report pending'}</div></div>
-    <button class="btn-primary" onclick="resetUpload()">+ Add Another</button>
-  </div>`;
+  var rc=ng.result==='W'?'var(--win)':'var(--loss)';
+  document.getElementById('upload-step-3').innerHTML='<div class="success-card"><div><div class="success-title">&#10003; Game Added!</div><div class="success-sub">'+ng.date+' - PHX vs '+ng.oppAbbr+' - <span style="color:'+rc+';font-weight:700;">'+(ng.result==='W'?'WIN':'LOSS')+' '+ng.sunsScore+'-'+ng.oppScore+'</span> - '+(report?'Report generated':'Report pending')+'</div></div><button class="btn-primary" onclick="resetUpload()">+ Add Another</button></div>';
   document.getElementById('upload-step-3').style.display='block';
   renderGames();renderPlayers();updateHero();
-  setTimeout(()=>showSection('games'),1200);
+  setTimeout(function(){showSection('games');},1200);
 }
 
 function resetUpload(){
