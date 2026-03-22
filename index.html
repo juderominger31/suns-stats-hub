@@ -289,9 +289,9 @@ var SEED = [
     report: {
       summary: 'The San Antonio Spurs edged the Phoenix Suns 101-100 in a thrilling finish at Frost Bank Center. Victor Wembanyama led all scorers with 34 points.\n\nPhoenix mounted a strong effort with Collin Gillespie (24 pts, 6 threes) and Devin Booker (22 pts) combining for 46 points. The Suns led by 11 before San Antonio sealed it in Q4.',
       performers: [
-        { name: 'Collin Gillespie', line: '24 PTS · 6 AST · 6/11 3PT · +3', note: 'Most efficient Suns scorer with 6 threes and key playmaking.' },
-        { name: 'Devin Booker', line: '22 PTS · 5 AST · 8/21 FG · -12', note: 'Carried the load but 4 turnovers proved costly.' },
-        { name: 'Oso Ighodaro', line: '15 PTS · 7 REB · 7 AST · 7/10 FG · -1', note: 'Near triple-double and one of his best games of the season.' }
+        { name: 'Collin Gillespie', line: '24 PTS . 6 AST . 6/11 3PT . +3', note: 'Most efficient Suns scorer with 6 threes and key playmaking.' },
+        { name: 'Devin Booker', line: '22 PTS . 5 AST . 8/21 FG . -12', note: 'Carried the load but 4 turnovers proved costly.' },
+        { name: 'Oso Ighodaro', line: '15 PTS . 7 REB . 7 AST . 7/10 FG . -1', note: 'Near triple-double and one of his best games of the season.' }
       ],
       notes: ['Suns played without 5 rotation players due to injury.', 'San Antonio shot 91.3% from the free throw line.', 'Phoenix led by 11 before a 28-21 Q4 for SAS decided it.']
     }
@@ -312,8 +312,8 @@ var SEED = [
     report: {
       summary: 'The Minnesota Timberwolves handled the Suns 116-104 at Target Center.\n\nDevin Booker was heroic with 34 points but the Suns collapsed in Q4, outscored 24-18. Just 4 fast break points told the whole story.',
       performers: [
-        { name: 'Devin Booker', line: '34 PTS · 6 REB · 3 AST · 11/27 FG', note: 'Dominant effort let down by poor team support in the second half.' },
-        { name: 'Oso Ighodaro', line: '16 PTS · 10 REB · 4 AST · 7/12 FG', note: 'Double-double and one of his most complete games of the season.' }
+        { name: 'Devin Booker', line: '34 PTS . 6 REB . 3 AST . 11/27 FG', note: 'Dominant effort let down by poor team support in the second half.' },
+        { name: 'Oso Ighodaro', line: '16 PTS . 10 REB . 4 AST . 7/12 FG', note: 'Double-double and one of his most complete games of the season.' }
       ],
       notes: ['Suns led 39-36 after Q1 but were outscored 80-65 in the final 3 quarters.', '13 steals for the Suns but only 4 fast break points.', 'Minnesota dominated the paint in the second half.']
     }
@@ -333,11 +333,11 @@ var SEED = [
     report: {
       summary: 'Devin Booker poured in 40 points but it was not enough as the Boston Celtics took the game 120-112 at TD Garden.\n\nPhoenix led by 8 at one point but Booker\'s 7 turnovers and Boston\'s perimeter shooting proved decisive.',
       performers: [
-        { name: 'Devin Booker', line: '40 PTS · 4 REB · 6 AST · 15/24 FG', note: 'Career-level performance let down by 7 costly turnovers.' },
-        { name: 'Alex Highsmith', line: '16 PTS · 4/5 3PT · +5', note: 'Most efficient Suns player on the night — 4 of 5 from three.' },
-        { name: 'Jalen Green', line: '21 PTS · 5 REB · 8/16 FG · -2', note: 'Solid supporting effort alongside Booker.' }
+        { name: 'Devin Booker', line: '40 PTS . 4 REB . 6 AST . 15/24 FG', note: 'Career-level performance let down by 7 costly turnovers.' },
+        { name: 'Alex Highsmith', line: '16 PTS . 4/5 3PT . +5', note: 'Most efficient Suns player on the night -- 4 of 5 from three.' },
+        { name: 'Jalen Green', line: '21 PTS . 5 REB . 8/16 FG . -2', note: 'Solid supporting effort alongside Booker.' }
       ],
-      notes: ['Booker\'s 40 is the highest single-game total in all tracked Suns games.', 'Boston shot 14/32 from three — a decisive difference.', 'PHX was outrebounded 35-38.']
+      notes: ['Booker\'s 40 is the highest single-game total in all tracked Suns games.', 'Boston shot 14/32 from three -- a decisive difference.', 'PHX was outrebounded 35-38.']
     }
   }
 ];
@@ -408,7 +408,7 @@ function updateHero() {
     var avg = scorers[name].total / scorers[name].n;
     if (avg > topAvg) { topAvg = avg; topName = name; }
   });
-  document.getElementById('h-top').textContent = topName ? topName.split(' ').pop() + ' ' + topAvg.toFixed(1) : '—';
+  document.getElementById('h-top').textContent = topName ? topName.split(' ').pop() + ' ' + topAvg.toFixed(1) : '--';
 
   if (games.length) {
     var sr = games[0].result, sc = 1;
@@ -428,7 +428,7 @@ function renderGames() {
   list.innerHTML = '';
 
   if (!games.length) {
-    list.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No games yet</div><div class="empty-sub">Click "+ Add Game" to upload an NBA Official Scorer\'s Report PDF.</div></div>';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">&#128203;</div><div class="empty-title">No games yet</div><div class="empty-sub">Click "+ Add Game" to upload an NBA Official Scorer\'s Report PDF.</div></div>';
     return;
   }
 
@@ -653,7 +653,7 @@ function buildPDF(g) {
   var y = 0;
   var r = g.report || {};
 
-  // ── helpers ──────────────────────────────────────────
+  // -- helpers ------------------------------------------
   function setFont(style, size, color) {
     doc.setFont('helvetica', style || 'normal');
     doc.setFontSize(size || 10);
@@ -673,7 +673,7 @@ function buildPDF(g) {
     y = margin;
     // footer on new page
     setFont('normal', 8, '#888888');
-    doc.text('Phoenix Suns · 2025–26 Season Stats Portfolio', margin, 760);
+    doc.text('Phoenix Suns . 2025-26 Season Stats Portfolio', margin, 760);
     setFont('normal', 8, '#888888');
     doc.text('Page ' + doc.internal.getNumberOfPages(), W - margin, 760, { align: 'right' });
   }
@@ -681,7 +681,7 @@ function buildPDF(g) {
     if (y + needed > 730) addPage();
   }
 
-  // ── HEADER BLOCK ─────────────────────────────────────
+  // -- HEADER BLOCK -------------------------------------
   // Orange top bar
   doc.setFillColor('#E56020');
   doc.rect(0, 0, W, 6, 'F');
@@ -694,7 +694,7 @@ function buildPDF(g) {
 
   // Matchup line
   var resText = (g.result === 'W' ? 'Win' : 'Loss');
-  var matchup = 'Phoenix Suns ' + g.sunsScore + '  •  ' + g.opponent + ' ' + g.oppScore;
+  var matchup = 'Phoenix Suns ' + g.sunsScore + '  -  ' + g.opponent + ' ' + g.oppScore;
   setFont('normal', 13, '#333333');
   doc.text(matchup, margin, y);
   y += 16;
@@ -708,7 +708,7 @@ function buildPDF(g) {
   drawLine(y, '#E56020', 1.5);
   y += 16;
 
-  // ── GAME SUMMARY ─────────────────────────────────────
+  // -- GAME SUMMARY -------------------------------------
   if (r.summary) {
     setFont('bold', 11, '#E56020');
     doc.text('GAME SUMMARY', margin, y);
@@ -727,7 +727,7 @@ function buildPDF(g) {
     y += 14;
   }
 
-  // ── SCORE BY QUARTER ─────────────────────────────────
+  // -- SCORE BY QUARTER ---------------------------------
   checkPage(80);
   setFont('bold', 11, '#E56020');
   doc.text('SCORE BY QUARTER', margin, y);
@@ -786,7 +786,7 @@ function buildPDF(g) {
   drawLine(y, '#dddddd', 0.5);
   y += 16;
 
-  // ── KEY PERFORMERS ────────────────────────────────────
+  // -- KEY PERFORMERS ------------------------------------
   if (r.performers && r.performers.length) {
     checkPage(60);
     setFont('bold', 11, '#E56020');
@@ -800,8 +800,8 @@ function buildPDF(g) {
       checkPage(50);
       // Name and line on same row
       setFont('bold', 10, '#1a1a1a');
-      doc.text(p.name + '  —  ', margin, y);
-      var nameW = doc.getTextWidth(p.name + '  —  ');
+      doc.text(p.name + '  --  ', margin, y);
+      var nameW = doc.getTextWidth(p.name + '  --  ');
       setFont('normal', 9.5, '#E56020');
       doc.text(p.line || '', margin + nameW, y);
       y += 13;
@@ -817,11 +817,11 @@ function buildPDF(g) {
     y += 16;
   }
 
-  // ── TEAM STATISTICS ───────────────────────────────────
+  // -- TEAM STATISTICS -----------------------------------
   if (g.teamStats) {
     checkPage(70);
     setFont('bold', 11, '#E56020');
-    doc.text('TEAM STATISTICS — PHOENIX SUNS', margin, y);
+    doc.text('TEAM STATISTICS -- PHOENIX SUNS', margin, y);
     y += 16;
 
     var ts = g.teamStats;
@@ -857,11 +857,11 @@ function buildPDF(g) {
     y += 16;
   }
 
-  // ── BOX SCORE ─────────────────────────────────────────
+  // -- BOX SCORE -----------------------------------------
   if (g.players && g.players.length) {
     checkPage(120);
     setFont('bold', 11, '#E56020');
-    doc.text('PHOENIX SUNS — BOX SCORE', margin, y);
+    doc.text('PHOENIX SUNS -- BOX SCORE', margin, y);
     y += 14;
 
     var bCols = ['PLAYER', 'PTS', 'REB', 'AST', 'STL', 'FG', '3PT', 'FT', '+/-'];
@@ -914,7 +914,7 @@ function buildPDF(g) {
     y += 6;
   }
 
-  // ── NOTES ─────────────────────────────────────────────
+  // -- NOTES ---------------------------------------------
   if (r.notes && r.notes.length) {
     checkPage(60);
     drawLine(y, '#dddddd', 0.5);
@@ -925,7 +925,7 @@ function buildPDF(g) {
     r.notes.forEach(function(note) {
       checkPage(24);
       setFont('normal', 9, '#1a1a1a');
-      var noteW = wrap('•  ' + note, contentW - 10, 9);
+      var noteW = wrap('-  ' + note, contentW - 10, 9);
       doc.text(noteW, margin, y);
       y += noteW.length * 12 + 6;
       drawLine(y, '#eeeeee', 0.3);
@@ -933,14 +933,14 @@ function buildPDF(g) {
     });
   }
 
-  // ── FOOTER on page 1 ──────────────────────────────────
+  // -- FOOTER on page 1 ----------------------------------
   var totalPages = doc.internal.getNumberOfPages();
   for (var pg = 1; pg <= totalPages; pg++) {
     doc.setPage(pg);
     doc.setFillColor('#E56020');
     doc.rect(0, 768, W, 6, 'F');
     setFont('normal', 8, '#888888');
-    doc.text('Phoenix Suns · 2025–26 Season Stats Portfolio', margin, 762);
+    doc.text('Phoenix Suns . 2025-26 Season Stats Portfolio', margin, 762);
     doc.text('Page ' + pg + ' of ' + totalPages, W - margin, 762, { align: 'right' });
   }
 
@@ -949,7 +949,7 @@ function buildPDF(g) {
 
 function renderPlayers() {
   var grid = document.getElementById('players-grid');
-  if (!games.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">👤</div><div class="empty-title">No data yet</div></div>'; return; }
+  if (!games.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">&#128100;</div><div class="empty-title">No data yet</div></div>'; return; }
   var totals = {};
   games.forEach(function (g) {
     (g.players || []).forEach(function (p) {
@@ -978,7 +978,7 @@ function renderPlayers() {
 
 function renderAnalytics() {
   var grid = document.getElementById('analytics-grid');
-  if (!games.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No data yet</div></div>'; return; }
+  if (!games.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">&#128202;</div><div class="empty-title">No data yet</div></div>'; return; }
   var wins = games.filter(function (g) { return g.result === 'W'; }).length;
   function avg(fn) { return (games.reduce(function (a, g) { return a + fn(g); }, 0) / games.length).toFixed(1); }
   function avgi(fn) { return Math.round(games.reduce(function (a, g) { return a + fn(g); }, 0) / games.length); }
@@ -1186,7 +1186,7 @@ async function processPDF(file) {
   setProgress(25, 'Sending to Claude...', 'Extracting stats from box score');
 
   var extractPrompt = 'You are an NBA stats extractor. Read this NBA Official Scorer Report PDF and extract all data.'
-    + ' Return ONLY a JSON object — no markdown, no backticks, no preamble, no explanation.'
+    + ' Return ONLY a JSON object -- no markdown, no backticks, no preamble, no explanation.'
     + ' Your entire response must be a single JSON object starting with { and ending with }.'
     + ' Use this exact structure:'
     + ' {"date":"Mon DD, YYYY","opponent":"Full Team Name","oppAbbr":"ABC","location":"Arena, City, ST","homeAway":"Home or Away","sunsScore":0,"oppScore":0,"result":"W or L","attendance":"00,000","duration":"H:MM","quarters":{"suns":[0,0,0,0],"opp":[0,0,0,0]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"paintPts":0,"secondChance":0,"fastBreak":0},"players":[{"name":"First Last","pos":"G","num":"0","min":"00:00","pts":0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"fg":"0/0","three":"0/0","ft":"0/0","pm":0}]}'
