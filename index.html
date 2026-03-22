@@ -65,7 +65,7 @@ nav button.active{background:var(--orange);color:#fff;}
 .game-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .2s;cursor:pointer;}
 .game-card:hover{border-color:var(--orange);transform:translateX(3px);}
 .game-card.open .game-body{display:block;}
-.game-header-row{display:grid;grid-template-columns:110px 1fr 1fr 70px 110px 70px;gap:10px;align-items:center;padding:13px 18px;}
+.game-header-row{display:grid;grid-template-columns:110px 1fr 1fr 70px 110px 40px 60px;gap:10px;align-items:center;padding:13px 18px;}
 .game-date{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
 .game-matchup{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;}
 .game-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;}
@@ -339,6 +339,9 @@ footer span{color:var(--orange);}
 .live-tabs{display:flex;gap:4px;margin:10px 0;}
 .live-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
 .live-tab.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+.delete-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:4px;transition:all .2s;line-height:1;}
+.delete-btn:hover{color:var(--loss);background:rgba(231,76,60,.1);}
 </style>
 </head>
 <body>
@@ -719,6 +722,7 @@ function renderGames(){
         <div class="game-score">${g.sunsScore}–${g.oppScore}</div>
         <div><span class="badge badge-${g.result}">${g.result}</span></div>
         <div class="game-venue">${g.location}</div>
+        <button class="delete-btn" onclick="event.stopPropagation();deleteGame('${g.id}')" title="Delete game">&#x2715;</button>
         <div class="game-toggle">View ▾</div>
       </div>
       <div class="game-body">
@@ -737,6 +741,15 @@ function renderGames(){
     });
     grid.appendChild(card);
   });
+}
+
+function deleteGame(id){
+  if(!confirm('Delete this game? This cannot be undone.'))return;
+  games=games.filter(function(g){return g.id!==id;});
+  save(games);
+  renderGames();
+  renderPlayers();
+  updateHero();
 }
 
 function switchTab(btn,tab,id){
@@ -1246,6 +1259,9 @@ function downloadPDF(gameId) {
 .live-tabs{display:flex;gap:4px;margin:10px 0;}
 .live-tab{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
 .live-tab.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+.delete-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px 6px;border-radius:4px;transition:all .2s;line-height:1;}
+.delete-btn:hover{color:var(--loss);background:rgba(231,76,60,.1);}
 </style>
 </head>
 <body>
