@@ -221,6 +221,44 @@ nav button.active{background:var(--orange);color:#fff;}
 footer{background:var(--surface);border-top:1px solid var(--border);padding:18px 28px;text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;}
 footer span{color:var(--orange);}
 @media(max-width:768px){header{padding:0 14px;}nav{display:none;}.hero{padding:28px 14px;}.container{padding:24px 14px;}.game-header-row{grid-template-columns:80px 1fr 1fr;}.game-venue,.game-toggle{display:none;}}
+
+/* ── PRINT / PDF STYLES ── */
+@media print {
+  body { background: #fff !important; color: #000 !important; font-family: Arial, sans-serif; }
+  header, nav, .hero, footer, .ai-bar, .tabs, .tab-btn, #sec-games .section-hdr,
+  .game-header-row, .game-card:not(.open), .games-grid > .game-card:not(.print-target) { display: none !important; }
+  .game-card.print-target { display: block !important; border: none !important; }
+  .game-body { display: block !important; }
+  .tab-panel { display: none !important; }
+  .tab-panel.print-show { display: block !important; }
+  .report-panel { background: #fff !important; color: #000 !important; padding: 0 !important; }
+  .report-panel h3 { color: #1A3A5C !important; border-bottom: 2px solid #E56020 !important; font-size: 16px !important; padding-bottom: 6px !important; margin-bottom: 12px !important; }
+  .report-panel h4 { color: #333 !important; font-size: 13px !important; margin: 14px 0 6px !important; }
+  .report-panel p { color: #333 !important; font-size: 12px !important; }
+  .performer { background: #f5f5f5 !important; border-left: 3px solid #E56020 !important; }
+  .performer-name { color: #000 !important; }
+  .performer-line { color: #E56020 !important; }
+  .performer-note { color: #555 !important; }
+  .gen-badge { display: none !important; }
+  .print-header { display: block !important; }
+  .bx-table { width: 100% !important; font-size: 11px !important; }
+  .bx-table th { background: #1A3A5C !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bx-table tr:last-child td { background: #fff3e8 !important; color: #E56020 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qtr-row { border: 1px solid #ccc !important; }
+  .qtr-val { color: #000 !important; }
+  .qtr-cell.final-cell .qtr-val { color: #E56020 !important; }
+  .mini-stat { background: #f5f5f5 !important; }
+  .mini-stat-val { color: #E56020 !important; }
+  .tag { background: #eee !important; color: #555 !important; }
+  .pm-pos { color: #1E7A3E !important; }
+  .pm-neg { color: #C0392B !important; }
+  .hi-pts { color: #E56020 !important; }
+  .print-header { font-family: Arial, sans-serif; margin-bottom: 20px; border-bottom: 3px solid #1A3A5C; padding-bottom: 12px; }
+  .print-title { font-size: 22px; font-weight: 900; color: #1A3A5C; letter-spacing: -0.5px; }
+  .print-subtitle { font-size: 13px; color: #666; margin-top: 4px; }
+  .print-section-break { page-break-before: always; }
+}
+.print-header { display: none; }
 </style>
 </head>
 <body>
@@ -602,15 +640,27 @@ Players: ${g.players.map(p=>`${p.name}: ${p.pts}pts ${p.reb}reb ${p.ast}ast FG $
 Return JSON: {"summary":"Two paragraph ESPN-style narrative. Para 1: result and star performer. Para 2: key storylines and context. Separate with \\n\\n","performers":[{"name":"","line":"XX PTS · XX REB · XX AST · FG · +/-","note":"1-2 sentence analysis"}],"notes":["bullet 1","bullet 2","bullet 3"]}
 Pick 3 most impactful Suns performers. Be specific with numbers.`;
   try{
-    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
-    const parsed=JSON.parse(d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+    const rawR=d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const jsonRStart=rawR.indexOf('{'); const jsonREnd=rawR.lastIndexOf('}')+1;
+    const parsed=JSON.parse(rawR.slice(jsonRStart,jsonREnd));
     g.report=parsed;save(games);
     let inner=`<h3>Game Summary<span class="gen-badge">✓ Generated</span></h3>${parsed.summary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}<h4>Key Performers</h4>`;
     parsed.performers.forEach(p=>{inner+=`<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`;});
     inner+=`<h4>Notes</h4>`;parsed.notes.forEach(n=>{inner+=`<p>• ${n}</p>`;});
     rc.innerHTML=inner;
     btn.querySelector('span').textContent='↺ Regenerate';
+    // Add PDF button if not already there
+    const aiBar=btn.closest('.ai-bar');
+    if(!aiBar.querySelector('.pdf-dl-btn')){
+      const pdfBtn=document.createElement('button');
+      pdfBtn.className='ai-btn pdf-dl-btn';
+      pdfBtn.style.cssText='background:var(--surface3);border:1px solid var(--border);color:var(--orange);';
+      pdfBtn.innerHTML='⬇ PDF';
+      pdfBtn.onclick=()=>downloadPDF(gameId);
+      aiBar.querySelector('div:last-child').prepend(pdfBtn);
+    }
   }catch(e){rc.innerHTML=`<div style="color:var(--loss);padding:12px;font-size:13px;">⚠ Could not generate report. ${e.message}</div>`;}
   btn.classList.remove('loading');btn.disabled=false;
 }
@@ -758,7 +808,7 @@ async function generateRecap(){
   const gameList=LAST_NIGHT.map(g=>`${g.awayScore>g.homeScore?g.away:g.home} ${Math.max(g.awayScore,g.homeScore)}–${Math.min(g.awayScore,g.homeScore)} ${g.awayScore>g.homeScore?g.home:g.away} · ${g.note}`).join('\n');
   const prompt=`You are an NBA analyst. Write a punchy, engaging nightly recap for March 20, 2026. These were the 6 games:\n${gameList}\n\nWrite 3-4 sentences per game in ESPN style. Highlight the biggest storyline, star performer, and key stat. End with a "Game of the Night" pick and a one-line reason. Keep the whole thing under 400 words. No JSON, just plain text with game headers like "**DET 115, GSW 101**".`;
   try{
-    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
     const d=await r.json();
     const text=d.content.map(i=>i.text||'').join('');
     reportDiv.innerHTML=`<div class="report-panel"><h3>Full Recap — March 20, 2026<span class="gen-badge">✓ AI Generated</span></h3>${text.split('\n').map(l=>l.trim()?`<p>${l.replace(/\*\*(.*?)\*\*/g,'<strong style="color:var(--orange)">$1</strong>')}</p>`:'').join('')}</div>`;
@@ -808,9 +858,11 @@ Return: {"date":"Mon DD, YYYY","opponent":"Full Name","oppAbbr":"3-LETTER","loca
 Suns may be VISITOR or HOME. Only include players who played (skip DNP).`;
   let gd;
   try{
-    const r1=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:ep}]}]})});
+    const r1=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:ep}]}]})});
     const d1=await r1.json();
-    gd=JSON.parse(d1.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+    const raw1=d1.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const json1Start=raw1.indexOf('{'); const json1End=raw1.lastIndexOf('}')+1;
+    gd=JSON.parse(raw1.slice(json1Start,json1End));
   }catch(e){showUploadError('Could not read this PDF. Make sure it is an NBA Official Scorer\'s Report. ('+e.message+')');document.getElementById('upload-step-2').style.display='none';document.getElementById('upload-step-1').style.display='block';return;}
   setProgress(55,'Stats extracted!','Generating game report...');
   const gid='PHX-'+gd.oppAbbr+'-'+gd.date.replace(/[^0-9]/g,'');
@@ -824,9 +876,11 @@ Return: {"summary":"Two paragraph ESPN-style narrative separated by \\n\\n","per
   let report=null;
   try{
     setProgress(72,'Writing report...','Claude is analyzing the game');
-    const r2=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:rp}]})});
+    const r2=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:rp}]})});
     const d2=await r2.json();
-    report=JSON.parse(d2.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim());
+    const raw2=d2.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const json2Start=raw2.indexOf('{'); const json2End=raw2.lastIndexOf('}')+1;
+    report=JSON.parse(raw2.slice(json2Start,json2End));
   }catch(e){report=null;}
   setProgress(95,'Saving to portfolio...');
   await new Promise(r=>setTimeout(r,400));
@@ -868,6 +922,112 @@ function updateHero(){
   const streakEl=document.getElementById('h-streak');
   streakEl.textContent=(streak.r==='W'?'W':'L')+streak.n;
   streakEl.style.color=streak.r==='W'?'var(--win)':'var(--loss)';
+}
+
+// ── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+function downloadPDF(gameId) {
+  const g = games.find(x => x.id === gameId);
+  if (!g || !g.report) return;
+
+  // Build a clean printable HTML page
+  const r = g.report;
+  const ts = g.teamStats;
+  const maxPts = Math.max(...g.players.map(p => p.pts));
+
+  const playerRows = g.players.map(p => `
+    <tr>
+      <td style="text-align:left;font-weight:600;">${p.name} <span style="background:#eee;color:#555;font-size:9px;padding:1px 5px;border-radius:2px;">${p.pos}</span></td>
+      <td>${p.pts}</td><td>${p.reb}</td><td>${p.ast}</td><td>${p.stl}</td>
+      <td>${p.fg}</td><td>${p.three}</td><td>${p.ft}</td>
+      <td style="color:${p.pm>0?'#1E7A3E':p.pm<0?'#C0392B':'#888'}">${p.pm>0?'+':''}${p.pm}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Game Report - PHX vs ${g.oppAbbr} ${g.date}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; color: #111; background: #fff; padding: 40px; font-size: 13px; line-height: 1.6; }
+  .title-block { border-bottom: 3px solid #1A3A5C; padding-bottom: 14px; margin-bottom: 20px; }
+  .main-title { font-size: 28px; font-weight: 900; color: #1A3A5C; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .main-title span { color: #E56020; }
+  .subtitle { font-size: 13px; color: #666; }
+  .section-hdr { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #E56020; border-bottom: 2px solid #E56020; padding-bottom: 6px; margin: 22px 0 12px; }
+  p { margin-bottom: 9px; color: #333; font-size: 13px; }
+  .performer { background: #f8f8f8; border-left: 4px solid #E56020; padding: 10px 14px; margin-bottom: 8px; border-radius: 0 4px 4px 0; }
+  .performer-name { font-weight: 900; font-size: 14px; color: #1A3A5C; }
+  .performer-line { color: #E56020; font-weight: 700; font-size: 12px; margin: 3px 0; }
+  .performer-note { color: #555; font-size: 12px; }
+  .note-item { margin-bottom: 6px; font-size: 12px; color: #333; }
+  .note-item::before { content: "• "; color: #E56020; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  th { background: #1A3A5C; color: #fff; padding: 7px 8px; text-align: center; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  th:first-child { text-align: left; }
+  td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  td:first-child { text-align: left; }
+  tr:last-child td { background: #fff3e8; color: #E56020; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qtr-table th { background: #1A3A5C; }
+  .team-stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 10px; }
+  .ts-box { background: #f5f5f5; border-radius: 4px; padding: 10px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ts-val { font-size: 20px; font-weight: 900; color: #E56020; }
+  .ts-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-top: 2px; }
+  .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; text-align: center; }
+  @media print { body { padding: 20px; } }
+</style>
+</head>
+<body>
+  <div class="title-block">
+    <div class="main-title">GAME REPORT — <span>PHX ${g.sunsScore}</span> · ${g.oppAbbr} ${g.oppScore}</div>
+    <div class="subtitle">${g.date} · ${g.location} · ${g.homeAway} · Attendance: ${g.attendance} · Duration: ${g.duration}</div>
+  </div>
+
+  <div class="section-hdr">Game Summary</div>
+  ${r.summary.split('\n\n').map(para => `<p>${para}</p>`).join('')}
+
+  <div class="section-hdr">Score by Quarter</div>
+  <table class="qtr-table">
+    <thead><tr><th>Team</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Final</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:700;">Phoenix Suns</td><td>${g.quarters.suns[0]}</td><td>${g.quarters.suns[1]}</td><td>${g.quarters.suns[2]}</td><td>${g.quarters.suns[3]}</td><td style="font-weight:900;color:${g.result==='W'?'#1E7A3E':'#C0392B'}">${g.sunsScore}</td></tr>
+      <tr><td style="font-weight:700;">${g.opponent}</td><td>${g.quarters.opp[0]}</td><td>${g.quarters.opp[1]}</td><td>${g.quarters.opp[2]}</td><td>${g.quarters.opp[3]}</td><td style="font-weight:900;color:${g.result==='L'?'#1E7A3E':'#C0392B'}">${g.oppScore}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Key Performers — Phoenix Suns</div>
+  ${r.performers.map(p => `<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`).join('')}
+
+  <div class="section-hdr">Box Score — Phoenix Suns</div>
+  <table>
+    <thead><tr><th>Player</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>FG</th><th>3PT</th><th>FT</th><th>+/-</th></tr></thead>
+    <tbody>
+      ${playerRows}
+      <tr><td>TOTALS</td><td>${g.sunsScore}</td><td>${ts.reb}</td><td>${ts.ast}</td><td>${ts.stl}</td><td>${ts.fgPct}%</td><td>${ts.threePct}%</td><td>${ts.ftPct}%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Team Statistics</div>
+  <div class="team-stats-grid">
+    ${[['FG%',ts.fgPct+'%'],['3PT%',ts.threePct+'%'],['FT%',ts.ftPct+'%'],['REB',ts.reb],['AST',ts.ast],['Paint Pts',ts.paintPts],['2nd Chance',ts.secondChance],['Fast Break',ts.fastBreak],['TO',ts.to],['STL',ts.stl]].map(([l,v])=>`<div class="ts-box"><div class="ts-val">${v}</div><div class="ts-lbl">${l}</div></div>`).join('')}
+  </div>
+
+  <div class="section-hdr">Notes</div>
+  ${r.notes.map(n => `<div class="note-item">${n}</div>`).join('')}
+
+  <div class="footer">Phoenix Suns · 2025–26 Season Stats Hub · ${g.date} · PHX vs ${g.oppAbbr}</div>
+</body>
+</html>`;
+
+  // Open in new window and trigger print dialog
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => {
+      win.print();
+    }, 500);
+  };
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
