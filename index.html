@@ -1028,6 +1028,9 @@ async function fetchRecap() {
   var now = new Date();
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var todayStr = months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  var dd = String(now.getDate()).padStart(2,'0');
+  var yyyy = now.getFullYear();
 
   var btn = document.getElementById('recap-btn');
   btn.disabled = true;
@@ -1037,60 +1040,71 @@ async function fetchRecap() {
   document.getElementById('recap-report').innerHTML = '';
 
   try {
-    // Fetch directly from NBA live scoreboard
-    var resp = await fetch('/api/scores');
+    var espnUrl = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates=' + yyyy + mm + dd;
+    var resp = await fetch(espnUrl);
+    if (!resp.ok) throw new Error('ESPN API returned ' + resp.status);
     var data = await resp.json();
-    if (data.error) throw new Error(data.error);
+    var events = data.events || [];
 
-    var games = data.games || [];
-    var finished = games.filter(function(g) {
-      return g.homeScore !== '' && g.awayScore !== '' && parseInt(g.homeScore) + parseInt(g.awayScore) > 0;
+    var finished = events.filter(function(e) {
+      return e.status && e.status.type && e.status.type.completed === true;
     });
 
-    recapGames = finished.map(function(g) {
-      var winner = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.home : g.away;
-      var loser  = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.away : g.home;
-      var wScore = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.homeScore : g.awayScore;
-      var lScore = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.awayScore : g.homeScore;
-      return winner + ' ' + wScore + ' - ' + loser + ' ' + lScore;
+    recapGames = finished.map(function(e) {
+      var comps = e.competitions[0].competitors;
+      var home = comps.find(function(c) { return c.homeAway === 'home'; });
+      var away = comps.find(function(c) { return c.homeAway === 'away'; });
+      var hScore = parseInt(home.score || 0);
+      var aScore = parseInt(away.score || 0);
+      var winner = hScore > aScore ? home.team.abbreviation : away.team.abbreviation;
+      var loser  = hScore > aScore ? away.team.abbreviation : home.team.abbreviation;
+      return winner + ' ' + (hScore > aScore ? hScore : aScore) + ' - ' + loser + ' ' + (hScore > aScore ? aScore : hScore);
     });
 
-    var label = finished.length ? todayStr : 'No final scores yet today';
-    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + finished.length + ' completed games &middot; ' + label + '</p>';
+    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + finished.length + ' completed games &middot; ' + todayStr + '</p>';
 
     var html = '';
-    finished.forEach(function(g) {
-      var homeWon = parseInt(g.homeScore) > parseInt(g.awayScore);
-      var winTeam = homeWon ? g.homeName : g.awayName;
-      var losTeam = homeWon ? g.awayName : g.homeName;
-      var winScore = homeWon ? g.homeScore : g.awayScore;
-      var losScore = homeWon ? g.awayScore : g.homeScore;
-      var isSuns = g.home === 'PHX' || g.away === 'PHX';
-      html += '<div class="recap-card" style="' + (isSuns ? 'border-color:var(--orange)' : '') + '">'
-        + '<div style="display:flex;align-items:center;justify-content:space-between">'
-        + '<div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px">' + winTeam + ' <span style="color:var(--orange)">' + winScore + '</span> &ndash; ' + losTeam + ' ' + losScore + '</div>'
-        + (isSuns ? '<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange)">SUNS</div>' : '')
-        + '</div>'
-        + '<div style="font-size:12px;color:var(--muted);margin-top:4px">' + g.status + '</div>'
-        + '</div>';
+    finished.forEach(function(e) {
+      var comps = e.competitions[0].competitors;
+      var home = comps.find(function(c) { return c.homeAway === 'home'; });
+      var away = comps.find(function(c) { return c.homeAway === 'away'; });
+      var hScore = parseInt(home.score || 0);
+      var aScore = parseInt(away.score || 0);
+      var homeWon = hScore > aScore;
+      var winName = homeWon ? home.team.displayName : away.team.displayName;
+      var losName = homeWon ? away.team.displayName : home.team.displayName;
+      var winScore = homeWon ? hScore : aScore;
+      var losScore = homeWon ? aScore : hScore;
+      var isSuns = home.team.abbreviation === 'PHX' || away.team.abbreviation === 'PHX';
+      var border = isSuns ? 'border-color:var(--orange);' : '';
+      html += '<div class="recap-card" style="' + border + '">';
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">';
+      html += '<div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px">';
+      html += winName + ' <span style="color:var(--orange)">' + winScore + '</span> &ndash; ' + losName + ' ' + losScore;
+      html += '</div>';
+      if (isSuns) html += '<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange)">&#9670; SUNS</div>';
+      html += '</div></div>';
     });
 
     if (!finished.length) {
-      html = '<div class="recap-card"><p style="color:var(--muted)">No completed games yet. Check back later or games may still be in progress.</p></div>';
+      var live = events.filter(function(e) { return e.status && e.status.type && !e.status.type.completed; });
+      if (live.length) {
+        html = '<div class="recap-card"><p style="color:var(--muted)">' + live.length + ' game(s) still in progress. Refresh soon!</p></div>';
+      } else {
+        html = '<div class="recap-card"><p style="color:var(--muted)">No games today, or scores not yet available.</p></div>';
+      }
     }
 
     document.getElementById('recap-games').innerHTML = html;
-
     if (recapGames.length) {
       document.getElementById('recap-report').innerHTML = '<button class="btn btn-primary" onclick="generateRecap()" style="margin-top:8px">&#10022; Generate Full AI Recap</button>';
     }
-
     btn.disabled = false;
     btn.textContent = 'Refresh';
   } catch (err) {
     btn.disabled = false;
     btn.textContent = 'Fetch Scores';
-    document.getElementById('recap-header').innerHTML = '<p style="color:var(--loss);font-size:13px">Error fetching scores: ' + err.message + '</p>';
+    document.getElementById('recap-header').innerHTML = '<p style="color:var(--loss);font-size:13px">Could not load scores: ' + err.message + '</p>';
   }
 }
 
