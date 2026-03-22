@@ -1028,6 +1028,7 @@ async function fetchRecap() {
   var now = new Date();
   var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   var todayStr = months[now.getMonth()] + ' ' + now.getDate() + ' ' + now.getFullYear();
+
   var btn = document.getElementById('recap-btn');
   btn.disabled = true;
   btn.textContent = 'Fetching...';
@@ -1036,34 +1037,60 @@ async function fetchRecap() {
   document.getElementById('recap-report').innerHTML = '';
 
   try {
-    var resp = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 800,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: 'Search for NBA scores from ' + todayStr + '. List each game on its own line in this exact format: GAME: Team A 110 - Team B 98. Only output lines starting with GAME:' }]
-      })
-    });
+    // Fetch directly from NBA live scoreboard
+    var resp = await fetch('/api/scores');
     var data = await resp.json();
-    var text = (data.content || []).map(function (i) { return i.text || ''; }).join('');
-    recapGames = text.split('\n').filter(function (l) { return l.trim().indexOf('GAME:') === 0; }).map(function (l) { return l.replace('GAME:', '').trim(); });
+    if (data.error) throw new Error(data.error);
 
-    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + recapGames.length + ' games &middot; ' + todayStr + '</p>';
+    var games = data.games || [];
+    var finished = games.filter(function(g) {
+      return g.homeScore !== '' && g.awayScore !== '' && parseInt(g.homeScore) + parseInt(g.awayScore) > 0;
+    });
+
+    recapGames = finished.map(function(g) {
+      var winner = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.home : g.away;
+      var loser  = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.away : g.home;
+      var wScore = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.homeScore : g.awayScore;
+      var lScore = parseInt(g.homeScore) > parseInt(g.awayScore) ? g.awayScore : g.homeScore;
+      return winner + ' ' + wScore + ' - ' + loser + ' ' + lScore;
+    });
+
+    var label = finished.length ? todayStr : 'No final scores yet today';
+    document.getElementById('recap-header').innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Found ' + finished.length + ' completed games &middot; ' + label + '</p>';
+
     var html = '';
-    recapGames.forEach(function (g) { html += '<div class="recap-card"><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:18px">' + g + '</div></div>'; });
+    finished.forEach(function(g) {
+      var homeWon = parseInt(g.homeScore) > parseInt(g.awayScore);
+      var winTeam = homeWon ? g.homeName : g.awayName;
+      var losTeam = homeWon ? g.awayName : g.homeName;
+      var winScore = homeWon ? g.homeScore : g.awayScore;
+      var losScore = homeWon ? g.awayScore : g.homeScore;
+      var isSuns = g.home === 'PHX' || g.away === 'PHX';
+      html += '<div class="recap-card" style="' + (isSuns ? 'border-color:var(--orange)' : '') + '">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between">'
+        + '<div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px">' + winTeam + ' <span style="color:var(--orange)">' + winScore + '</span> &ndash; ' + losTeam + ' ' + losScore + '</div>'
+        + (isSuns ? '<div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--orange)">SUNS</div>' : '')
+        + '</div>'
+        + '<div style="font-size:12px;color:var(--muted);margin-top:4px">' + g.status + '</div>'
+        + '</div>';
+    });
+
+    if (!finished.length) {
+      html = '<div class="recap-card"><p style="color:var(--muted)">No completed games yet. Check back later or games may still be in progress.</p></div>';
+    }
+
     document.getElementById('recap-games').innerHTML = html;
 
     if (recapGames.length) {
       document.getElementById('recap-report').innerHTML = '<button class="btn btn-primary" onclick="generateRecap()" style="margin-top:8px">&#10022; Generate Full AI Recap</button>';
     }
+
     btn.disabled = false;
     btn.textContent = 'Refresh';
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = 'Fetch Last Night';
-    document.getElementById('recap-header').innerHTML = '<p style="color:var(--loss);font-size:13px">Error: ' + err.message + '</p>';
+    btn.textContent = 'Fetch Scores';
+    document.getElementById('recap-header').innerHTML = '<p style="color:var(--loss);font-size:13px">Error fetching scores: ' + err.message + '</p>';
   }
 }
 
@@ -1075,7 +1102,7 @@ async function generateRecap() {
     var resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Write an ESPN-style NBA nightly recap for ' + todayStr + '. Games: ' + recapGames.join(', ') + '. Write 3-4 energetic paragraphs covering highlights and storylines.' }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Write an ESPN-style NBA nightly recap. Games: ' + recapGames.join(', ') + '. Write 3-4 energetic paragraphs covering highlights, upsets, and key performances.' }] })
     });
     var data = await resp.json();
     var text = (data.content || []).map(function (i) { return i.text || ''; }).join('');
