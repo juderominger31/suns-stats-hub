@@ -609,7 +609,7 @@ async function generateReport(gameId) {
     + 'Return ONLY valid JSON with no markdown: {"summary":"Two paragraph narrative separated by two newlines","performers":[{"name":"","line":"stats line","note":"1-2 sentences"}],"notes":["note1","note2","note3"]}';
 
   try {
-    var resp = await fetch('/.netlify/functions/claude', {
+    var resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: p }] })
@@ -737,7 +737,7 @@ async function fetchRecap() {
   document.getElementById('recap-report').innerHTML = '';
 
   try {
-    var resp = await fetch('/.netlify/functions/claude', {
+    var resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -773,7 +773,7 @@ async function generateRecap() {
   var btn = document.querySelector('#recap-report button');
   if (btn) { btn.disabled = true; btn.textContent = 'Writing...'; }
   try {
-    var resp = await fetch('/.netlify/functions/claude', {
+    var resp = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: 'Write an ESPN-style NBA nightly recap for March 20 2026. Games: ' + recapGames.join(', ') + '. Write 3-4 energetic paragraphs covering highlights and storylines.' }] })
@@ -854,7 +854,7 @@ async function processPDF(file) {
 
   var gameData;
   try {
-    var r1 = await fetch('/.netlify/functions/claude', {
+    var r1 = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -869,13 +869,15 @@ async function processPDF(file) {
         }]
       })
     });
-    var d1 = await r1.json();
-    if (d1.error) throw new Error(d1.error.message || 'API error');
+    var t1 = await r1.text();
+    var d1;
+    try { d1 = JSON.parse(t1); } catch(pe) { throw new Error('Bad server response (the PDF may be too large). Details: ' + t1.slice(0,120)); }
+    if (d1.error) throw new Error(d1.error.message || JSON.stringify(d1.error));
     var raw1 = (d1.content || []).map(function (i) { return i.text || ''; }).join('');
     raw1 = raw1.replace(/```json/gi, '').replace(/```/g, '').trim();
     var s1 = raw1.indexOf('{');
     var e1 = raw1.lastIndexOf('}');
-    if (s1 < 0 || e1 < 0) throw new Error('Claude did not return valid JSON — please try again');
+    if (s1 < 0 || e1 < 0) throw new Error('No JSON in response. Raw: ' + raw1.slice(0,120));
     gameData = JSON.parse(raw1.slice(s1, e1 + 1));
   } catch (err) {
     document.getElementById('upload-step-2').style.display = 'none';
@@ -905,7 +907,7 @@ async function processPDF(file) {
   var report = null;
   try {
     setProgress(70, 'Writing report...', 'Claude is analyzing the game');
-    var r2 = await fetch('/.netlify/functions/claude', {
+    var r2 = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1500, messages: [{ role: 'user', content: reportPrompt }] })
