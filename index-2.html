@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHX Suns — Stats Hub 2025–26</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --orange:#E56020; --purple:#1D1160; --gold:#D4AF37;
+  --dark:#0A0A0F; --surface:#111118; --surface2:#18181F;
+  --surface3:#22222C; --border:#2A2A38; --border2:#383848;
+  --text:#F0F0F0; --muted:#888; --muted2:#555;
+  --win:#2ECC71; --loss:#E74C3C;
+  --radius:8px; --radius-lg:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* ── HEADER ── */
+header{background:var(--surface);border-bottom:2px solid var(--orange);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:36px;height:36px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;box-shadow:0 0 14px rgba(229,96,32,.4);}
+.logo-text{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;letter-spacing:1px;text-transform:uppercase;}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+nav{display:flex;gap:4px;}
+nav button{background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-radius:var(--radius);transition:all .2s;}
+nav button:hover{color:var(--orange);background:rgba(229,96,32,.1);}
+nav button.active{background:var(--orange);color:#fff;}
+
+/* ── HERO ── */
+.hero{background:linear-gradient(150deg,#1D1160 0%,#0A0A0F 60%);padding:48px 28px 40px;position:relative;overflow:hidden;}
+.hero::after{content:"PHX";position:absolute;right:-10px;top:-20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:200px;color:rgba(229,96,32,.04);pointer-events:none;line-height:1;}
+.hero-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;}
+.hero-eyebrow{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:8px;}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(40px,5vw,68px);line-height:1;letter-spacing:-1px;text-transform:uppercase;margin-bottom:10px;}
+.hero h1 span{color:var(--orange);}
+.hero-sub{font-size:15px;color:var(--muted);max-width:480px;line-height:1.6;}
+.hero-stats{display:flex;gap:28px;margin-top:32px;flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:2px;}
+.hs-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:34px;line-height:1;}
+.hs-val.accent{color:var(--orange);}
+.hs-lbl{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.hero-divider{width:1px;background:var(--border2);}
+
+/* ── LAYOUT ── */
+.container{max-width:1200px;margin:0 auto;padding:36px 28px;}
+.section{margin-bottom:52px;}
+.section-hdr{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;letter-spacing:1px;text-transform:uppercase;}
+.section-pill{background:var(--orange);color:#fff;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 9px;border-radius:20px;}
+.section-line{flex:1;height:1px;background:var(--border);}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.card:hover{border-color:var(--border2);}
+
+/* ── GAME LOG ── */
+.game-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .2s;cursor:pointer;}
+.game-card:hover{border-color:var(--orange);transform:translateX(3px);}
+.game-card.open .game-body{display:block;}
+.game-header-row{display:grid;grid-template-columns:110px 1fr 1fr 70px 110px 70px;gap:10px;align-items:center;padding:13px 18px;}
+.game-date{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.game-matchup{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;}
+.game-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;letter-spacing:1px;}
+.badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;padding:3px 10px;border-radius:4px;text-transform:uppercase;}
+.badge-W{background:rgba(46,204,113,.15);color:var(--win);}
+.badge-L{background:rgba(231,76,60,.15);color:var(--loss);}
+.game-venue{font-size:12px;color:var(--muted);}
+.game-toggle{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;color:var(--orange);text-align:right;text-transform:uppercase;}
+.game-body{display:none;border-top:1px solid var(--border);padding:18px;}
+.tabs{display:flex;gap:4px;margin-bottom:14px;}
+.tab-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:4px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.tab-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ── BOX SCORE TABLE ── */
+.tbl-wrap{overflow-x:auto;}
+.bx-table{width:100%;border-collapse:collapse;font-size:12px;min-width:680px;}
+.bx-table th{background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:center;border-bottom:1px solid var(--border);}
+.bx-table th:first-child{text-align:left;}
+.bx-table td{padding:8px 9px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:12px;}
+.bx-table td:first-child{text-align:left;font-weight:600;}
+.bx-table tr:last-child td{background:rgba(229,96,32,.07);font-weight:700;color:var(--orange);border-top:1px solid var(--border);}
+.bx-table tr:hover td{background:rgba(255,255,255,.02);}
+.hi-pts{color:var(--orange);font-weight:700;}
+.pm-pos{color:var(--win);}
+.pm-neg{color:var(--loss);}
+.team-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);padding:8px 0 5px;}
+
+/* ── REPORT PANEL ── */
+.report-panel{background:var(--surface2);border-radius:var(--radius);padding:20px;line-height:1.7;}
+.report-panel h3{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:12px;}
+.report-panel h4{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:#ccc;margin:14px 0 6px;}
+.report-panel p{font-size:13px;color:#bbb;margin-bottom:7px;}
+.performer{background:var(--surface3);border-left:3px solid var(--orange);padding:9px 13px;border-radius:0 4px 4px 0;margin-bottom:7px;}
+.performer-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;color:#fff;}
+.performer-line{font-size:12px;color:var(--orange);font-weight:600;margin:2px 0;}
+.performer-note{font-size:12px;color:#999;}
+.gen-badge{display:inline-block;background:rgba(46,204,113,.15);color:var(--win);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-left:8px;}
+
+/* ── AI GENERATE BAR ── */
+.ai-bar{display:flex;align-items:center;justify-content:space-between;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;}
+.ai-bar-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.ai-bar-lbl span{color:var(--orange);}
+.ai-btn{background:linear-gradient(135deg,var(--orange),#c94d14);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:12px;letter-spacing:1px;text-transform:uppercase;padding:7px 18px;border-radius:var(--radius);display:flex;align-items:center;gap:6px;transition:all .2s;}
+.ai-btn:hover{opacity:.85;transform:translateY(-1px);}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.ai-btn.loading .spinner{display:block;}
+
+/* ── QTR SCORE ── */
+.qtr-row{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;width:fit-content;margin-bottom:14px;}
+.qtr-cell{padding:8px 16px;text-align:center;border-right:1px solid var(--border);min-width:65px;}
+.qtr-cell:last-child{border-right:none;}
+.qtr-cell.final-cell{background:rgba(229,96,32,.08);min-width:75px;}
+.qtr-team{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.qtr-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.qtr-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;}
+.qtr-cell.final-cell .qtr-val{color:var(--orange);font-size:22px;}
+.mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.mini-stat{background:var(--surface2);border-radius:var(--radius);padding:12px;text-align:center;}
+.mini-stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;color:var(--orange);}
+.mini-stat-lbl{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── PLAYER CARDS ── */
+.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.player-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;transition:all .2s;position:relative;overflow:hidden;}
+.player-card:hover{border-color:var(--orange);transform:translateY(-2px);}
+.player-card::before{content:attr(data-num);position:absolute;right:-6px;top:-8px;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:66px;color:rgba(255,255,255,.03);pointer-events:none;line-height:1;}
+.pc-pos{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);margin-bottom:3px;}
+.pc-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;line-height:1.1;margin-bottom:12px;}
+.pc-stats{display:flex;flex-direction:column;gap:7px;}
+.pc-stat-row{display:flex;justify-content:space-between;align-items:center;}
+.pc-lbl{font-size:11px;color:var(--muted);font-weight:500;}
+.pc-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;}
+.pc-val.hi{color:var(--orange);}
+.pc-divider{height:1px;background:var(--border);}
+.pc-games{font-size:10px;color:var(--muted);margin-top:5px;font-weight:600;letter-spacing:1px;text-transform:uppercase;}
+
+/* ── ANALYTICS ── */
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+.analytic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+.analytic-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.stat-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.stat-bar-lbl{font-size:12px;color:#ccc;min-width:120px;}
+.stat-bar-track{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.stat-bar-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .6s ease;}
+.stat-bar-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--orange);min-width:45px;text-align:right;}
+.trend-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.trend-row:last-child{border-bottom:none;}
+.trend-lbl{font-size:13px;color:#ccc;}
+.trend-val{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;}
+.trend-val.pos{color:var(--win);}
+.trend-val.neg{color:var(--loss);}
+.trend-val.neu{color:var(--text);}
+.big-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.big-stat{background:var(--surface2);border-radius:var(--radius);padding:12px;text-align:center;}
+.big-stat-num{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:28px;color:var(--orange);}
+.big-stat-lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;font-weight:600;}
+
+/* ── STANDINGS ── */
+.standings-tbl{width:100%;border-collapse:collapse;}
+.standings-tbl th{background:var(--surface3);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:9px 13px;text-align:center;border-bottom:2px solid var(--border);}
+.standings-tbl th:nth-child(2){text-align:left;}
+.standings-tbl td{padding:10px 13px;text-align:center;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px;}
+.standings-tbl td:nth-child(2){text-align:left;font-weight:700;}
+.standings-tbl tr.hl td{background:rgba(229,96,32,.07);}
+.standings-tbl tr.hl td:nth-child(2){color:var(--orange);}
+.standings-tbl tr:hover td{background:rgba(255,255,255,.02);}
+.seed-num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--surface3);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:11px;line-height:20px;text-align:center;color:var(--muted);}
+.seed-num.top{background:var(--orange);color:#fff;}
+.wl-pct{font-weight:700;}
+
+/* ── UPLOAD ZONE ── */
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius-lg);padding:44px 28px;text-align:center;transition:all .2s;cursor:pointer;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--orange);background:rgba(229,96,32,.04);}
+.upload-icon{font-size:36px;margin-bottom:10px;}
+.upload-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.upload-sub{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.btn-primary{background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;padding:10px 26px;border-radius:var(--radius);transition:all .2s;display:inline-block;}
+.btn-primary:hover{background:#cf551a;}
+.upload-note{font-size:11px;color:var(--muted);margin-top:10px;}
+#file-input{display:none;}
+
+/* ── IMPORT PROGRESS ── */
+.import-progress-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;text-align:center;}
+.ip-spinner{font-size:34px;animation:spin .9s linear infinite;display:inline-block;margin-bottom:12px;}
+.ip-status{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:1px;text-transform:uppercase;}
+.ip-sub{font-size:12px;color:var(--muted);margin-top:5px;}
+.progress-track{margin-top:18px;background:var(--surface2);border-radius:4px;height:5px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--orange);width:0%;transition:width .5s ease;border-radius:4px;}
+
+/* ── SUCCESS CARD ── */
+.success-card{background:var(--surface);border:1px solid var(--win);border-radius:var(--radius-lg);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.success-title{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;letter-spacing:1px;text-transform:uppercase;color:var(--win);}
+.success-sub{font-size:13px;color:#aaa;margin-top:3px;}
+
+/* ── RECAP SECTION ── */
+.recap-game-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.recap-teams{flex:1;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;}
+.recap-score{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:20px;letter-spacing:1px;}
+.recap-note{font-size:12px;color:var(--muted);flex:2;}
+.recap-fetch-btn{background:var(--surface2);border:1px solid var(--border);color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.recap-fetch-btn:hover{background:rgba(229,96,32,.15);}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px;}
+.empty-icon{font-size:32px;margin-bottom:8px;}
+
+/* ── MISC ── */
+.tag{display:inline-block;background:var(--surface3);color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:1px 7px;border-radius:3px;margin-right:3px;}
+footer{background:var(--surface);border-top:1px solid var(--border);padding:18px 28px;text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;}
+footer span{color:var(--orange);}
+@media(max-width:768px){header{padding:0 14px;}nav{display:none;}.hero{padding:28px 14px;}.container{padding:24px 14px;}.game-header-row{grid-template-columns:80px 1fr 1fr;}.game-venue,.game-toggle{display:none;}}
+
+/* ── PRINT / PDF STYLES ── */
+@media print {
+  body { background: #fff !important; color: #000 !important; font-family: Arial, sans-serif; }
+  header, nav, .hero, footer, .ai-bar, .tabs, .tab-btn, #sec-games .section-hdr,
+  .game-header-row, .game-card:not(.open), .games-grid > .game-card:not(.print-target) { display: none !important; }
+  .game-card.print-target { display: block !important; border: none !important; }
+  .game-body { display: block !important; }
+  .tab-panel { display: none !important; }
+  .tab-panel.print-show { display: block !important; }
+  .report-panel { background: #fff !important; color: #000 !important; padding: 0 !important; }
+  .report-panel h3 { color: #1A3A5C !important; border-bottom: 2px solid #E56020 !important; font-size: 16px !important; padding-bottom: 6px !important; margin-bottom: 12px !important; }
+  .report-panel h4 { color: #333 !important; font-size: 13px !important; margin: 14px 0 6px !important; }
+  .report-panel p { color: #333 !important; font-size: 12px !important; }
+  .performer { background: #f5f5f5 !important; border-left: 3px solid #E56020 !important; }
+  .performer-name { color: #000 !important; }
+  .performer-line { color: #E56020 !important; }
+  .performer-note { color: #555 !important; }
+  .gen-badge { display: none !important; }
+  .print-header { display: block !important; }
+  .bx-table { width: 100% !important; font-size: 11px !important; }
+  .bx-table th { background: #1A3A5C !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .bx-table tr:last-child td { background: #fff3e8 !important; color: #E56020 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qtr-row { border: 1px solid #ccc !important; }
+  .qtr-val { color: #000 !important; }
+  .qtr-cell.final-cell .qtr-val { color: #E56020 !important; }
+  .mini-stat { background: #f5f5f5 !important; }
+  .mini-stat-val { color: #E56020 !important; }
+  .tag { background: #eee !important; color: #555 !important; }
+  .pm-pos { color: #1E7A3E !important; }
+  .pm-neg { color: #C0392B !important; }
+  .hi-pts { color: #E56020 !important; }
+  .print-header { font-family: Arial, sans-serif; margin-bottom: 20px; border-bottom: 3px solid #1A3A5C; padding-bottom: 12px; }
+  .print-title { font-size: 22px; font-weight: 900; color: #1A3A5C; letter-spacing: -0.5px; }
+  .print-subtitle { font-size: 13px; color: #666; margin-top: 4px; }
+  .print-section-break { page-break-before: always; }
+}
+.print-header { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">☀</div>
+    <div>
+      <div class="logo-text">Suns Stats Hub</div>
+      <div class="logo-sub">2025–26 Season</div>
+    </div>
+  </div>
+  <nav>
+    <button class="active" onclick="showSection('games')">Games</button>
+    <button onclick="showSection('players')">Players</button>
+    <button onclick="showSection('analytics')">Analytics</button>
+    <button onclick="showSection('standings')">Standings</button>
+    <button onclick="showSection('recap')">NBA Recap</button>
+    <button onclick="showSection('upload')">+ Add Game</button>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Phoenix Suns · 2025–26 Season</div>
+    <h1>Season <span>Stats</span><br>Hub</h1>
+    <p class="hero-sub">Upload box score PDFs — Claude AI reads them, builds reports, tracks every stat.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hs-val accent" id="h-record">39–31</div><div class="hs-lbl">Record</div></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><div class="hs-val" id="h-games">3</div><div class="hs-lbl">Games Logged</div></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><div class="hs-val" id="h-ppg">108.7</div><div class="hs-lbl">Avg PTS</div></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><div class="hs-val" id="h-top">Booker</div><div class="hs-lbl">Top Scorer</div></div>
+      <div class="hero-divider"></div>
+      <div class="hero-stat"><div class="hs-val" id="h-streak" style="color:var(--loss)">L3</div><div class="hs-lbl">Streak</div></div>
+    </div>
+  </div>
+</div>
+
+<main>
+<!-- ── GAMES ── -->
+<div id="sec-games" class="container">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">Game Log</div>
+      <div class="section-pill" id="games-pill">3 Games</div>
+      <div class="section-line"></div>
+    </div>
+    <div id="games-grid" style="display:flex;flex-direction:column;gap:10px;"></div>
+  </div>
+</div>
+
+<!-- ── PLAYERS ── -->
+<div id="sec-players" class="container" style="display:none;">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">Player Cards</div>
+      <div class="section-pill">Season Averages</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="players-grid" id="players-grid"></div>
+  </div>
+</div>
+
+<!-- ── ANALYTICS ── -->
+<div id="sec-analytics" class="container" style="display:none;">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">Analytics & Trends</div>
+      <div class="section-pill">Season Stats</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="analytics-grid" id="analytics-grid"></div>
+  </div>
+</div>
+
+<!-- ── STANDINGS ── -->
+<div id="sec-standings" class="container" style="display:none;">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">Western Conference</div>
+      <div class="section-pill">Standings</div>
+      <div class="section-line"></div>
+    </div>
+    <div class="card">
+      <table class="standings-tbl" id="standings-tbl">
+        <thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>PCT</th><th>GB</th><th>STRK</th></tr></thead>
+        <tbody id="standings-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECAP ── -->
+<div id="sec-recap" class="container" style="display:none;">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">NBA Nightly Recap</div>
+      <div class="section-pill">Last Night</div>
+      <div class="section-line"></div>
+    </div>
+    <div id="recap-content">
+      <div class="card" style="padding:20px;margin-bottom:16px;background:var(--surface2);">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;" id="recap-header">Loading last night's scores...</div>
+        <div style="font-size:13px;color:var(--muted);">Live results from across the NBA — updates every time you open this tab.</div>
+      </div>
+      <div id="recap-games"></div>
+      <div style="margin-top:16px;">
+        <button class="ai-btn" onclick="generateRecap()" id="recap-btn" style="width:100%;justify-content:center;">
+          <div class="spinner"></div>
+          <span>✦ Generate Full AI Recap</span>
+        </button>
+      </div>
+      <div id="recap-report" style="margin-top:16px;display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── UPLOAD ── -->
+<div id="sec-upload" class="container" style="display:none;">
+  <div class="section">
+    <div class="section-hdr">
+      <div class="section-title">Add New Game</div>
+      <div class="section-pill">AI Powered</div>
+      <div class="section-line"></div>
+    </div>
+    <div id="upload-step-1">
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon">☀</div>
+        <div class="upload-title">Drop a Box Score PDF</div>
+        <div class="upload-sub">Claude AI reads the PDF, extracts every stat, builds the full box score,<br>and auto-generates a game report — all right here.</div>
+        <button class="btn-primary" onclick="document.getElementById('file-input').click()">Choose PDF</button>
+        <input type="file" id="file-input" accept=".pdf">
+        <div class="upload-note">NBA Official Scorer's Report PDF · One game at a time</div>
+      </div>
+    </div>
+    <div id="upload-step-2" style="display:none;">
+      <div class="import-progress-card">
+        <div class="ip-spinner">⟳</div>
+        <div class="ip-status" id="ip-status">Reading PDF...</div>
+        <div class="ip-sub" id="ip-sub">Sending to Claude AI</div>
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      </div>
+    </div>
+    <div id="upload-step-3" style="display:none;"></div>
+  </div>
+</div>
+</main>
+
+<footer>Built for <span>PHX Suns</span> fans · 2025–26 NBA Season · Powered by Claude AI</footer>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const SK = 'suns_hub_v2';
+const SEED_GAMES = [
+  {
+    id:'PHX-SAS-20260319',date:'Mar 19, 2026',opponent:'San Antonio Spurs',oppAbbr:'SAS',
+    location:'Frost Bank Center, San Antonio, TX',homeAway:'Away',
+    sunsScore:100,oppScore:101,result:'L',attendance:'18,648',duration:'2:19',
+    quarters:{suns:[26,33,20,21],opp:[24,28,21,28]},
+    teamStats:{fgPct:41.8,threePct:30.6,ftPct:76.5,reb:47,ast:27,stl:9,blk:3,to:11,paintPts:34,secondChance:14,fastBreak:13},
+    players:[
+      {name:'Jalen Green',pos:'F',num:'4',min:'32:46',pts:17,reb:8,ast:4,stl:1,blk:0,to:3,fg:'7/20',three:'1/7',ft:'2/2',pm:-5},
+      {name:'Jordan Goodwin',pos:'F',num:'23',min:'35:14',pts:5,reb:8,ast:0,stl:3,blk:0,to:0,fg:'2/9',three:'1/5',ft:'0/0',pm:-14},
+      {name:'Oso Ighodaro',pos:'C',num:'11',min:'34:00',pts:15,reb:7,ast:7,stl:1,blk:0,to:0,fg:'7/10',three:'0/0',ft:'1/2',pm:-1},
+      {name:'Devin Booker',pos:'G',num:'1',min:'34:21',pts:22,reb:0,ast:5,stl:0,blk:0,to:4,fg:'8/21',three:'0/4',ft:'6/7',pm:-12},
+      {name:'Collin Gillespie',pos:'G',num:'12',min:'34:15',pts:24,reb:2,ast:6,stl:2,blk:0,to:1,fg:'7/13',three:'6/11',ft:'4/4',pm:3},
+      {name:'Ryan Dunn',pos:'G',num:'0',min:'19:31',pts:5,reb:8,ast:1,stl:1,blk:0,to:0,fg:'2/5',three:'1/3',ft:'0/0',pm:-2},
+      {name:'Khaman Maluach',pos:'C',num:'10',min:'13:45',pts:4,reb:5,ast:1,stl:0,blk:1,to:1,fg:'2/3',three:'0/0',ft:'0/0',pm:0},
+      {name:'Jamaree Bouyea',pos:'G',num:'17',min:'9:24',pts:0,reb:3,ast:1,stl:0,blk:0,to:0,fg:'0/3',three:'0/1',ft:'0/0',pm:12},
+      {name:'Rasheer Fleming',pos:'F',num:'20',min:'20:07',pts:8,reb:5,ast:0,stl:1,blk:2,to:1,fg:'3/7',three:'2/5',ft:'0/2',pm:11},
+      {name:'Amir Coffey',pos:'G',num:'2',min:'5:39',pts:0,reb:1,ast:2,stl:0,blk:0,to:1,fg:'0/0',three:'0/0',ft:'0/0',pm:3},
+    ],
+    report:{summary:"The San Antonio Spurs edged the Phoenix Suns 101–100 in a thrilling finish at a sold-out Frost Bank Center. Victor Wembanyama led all scorers with 34 points and a perfect 12-of-12 from the free throw line.\n\nPhoenix mounted a strong effort despite injuries, with Collin Gillespie (24 pts, 6 threes) and Devin Booker (22 pts) combining for 46 points. The Suns led by 11 before San Antonio's fourth quarter surge sealed it.",
+    performers:[{name:'Collin Gillespie',line:'24 PTS · 6 AST · 6/11 3PT · +3',note:'Most efficient Suns scorer — 6 threes and crucial playmaking built the first-half lead.'},{name:'Devin Booker',line:'22 PTS · 5 AST · 8/21 FG · -12',note:'Carried the load but 4 turnovers on a night they could not afford them proved costly.'},{name:'Oso Ighodaro',line:'15 PTS · 7 REB · 7 AST · 7/10 FG · -1',note:'Near triple-double. Efficient and versatile — one of his best games of the season.'}],
+    notes:['Suns played without 5 rotation players due to injury.','San Antonio shot a perfect 91.3% from the free throw line.','Phoenix led by 11 — the 28–21 Q4 for SAS was the difference.']}
+  },
+  {
+    id:'PHX-MIN-20260317',date:'Mar 17, 2026',opponent:'Minnesota Timberwolves',oppAbbr:'MIN',
+    location:'Target Center, Minneapolis, MN',homeAway:'Away',
+    sunsScore:104,oppScore:116,result:'L',attendance:'17,309',duration:'2:21',
+    quarters:{suns:[39,24,23,18],opp:[36,28,28,24]},
+    teamStats:{fgPct:38.1,threePct:35.1,ftPct:73.9,reb:40,ast:25,stl:13,blk:2,to:11,paintPts:44,secondChance:21,fastBreak:4},
+    players:[
+      {name:'Jalen Green',pos:'F',num:'4',min:'26:37',pts:9,reb:1,ast:5,stl:2,blk:1,to:1,fg:'3/17',three:'2/6',ft:'1/2',pm:-3},
+      {name:"Royce O'Neale",pos:'F',num:'00',min:'29:17',pts:9,reb:2,ast:2,stl:3,blk:0,to:3,fg:'3/6',three:'3/6',ft:'0/0',pm:4},
+      {name:'Oso Ighodaro',pos:'C',num:'11',min:'33:42',pts:16,reb:10,ast:4,stl:3,blk:0,to:4,fg:'7/12',three:'0/0',ft:'2/2',pm:-6},
+      {name:'Devin Booker',pos:'G',num:'1',min:'34:58',pts:34,reb:6,ast:3,stl:0,blk:0,to:2,fg:'11/27',three:'1/7',ft:'11/14',pm:-3},
+      {name:'Collin Gillespie',pos:'G',num:'12',min:'36:44',pts:12,reb:4,ast:7,stl:1,blk:0,to:0,fg:'4/13',three:'3/9',ft:'1/1',pm:-10},
+      {name:'Ryan Dunn',pos:'G',num:'0',min:'17:02',pts:7,reb:4,ast:1,stl:0,blk:1,to:0,fg:'3/3',three:'1/1',ft:'0/0',pm:-10},
+      {name:'Khaman Maluach',pos:'C',num:'10',min:'11:34',pts:2,reb:2,ast:0,stl:1,blk:0,to:0,fg:'1/3',three:'0/0',ft:'0/0',pm:-2},
+      {name:'Jordan Goodwin',pos:'F',num:'23',min:'23:47',pts:3,reb:8,ast:2,stl:2,blk:0,to:0,fg:'1/6',three:'0/2',ft:'1/2',pm:-11},
+      {name:'Rasheer Fleming',pos:'F',num:'20',min:'15:17',pts:9,reb:1,ast:0,stl:1,blk:0,to:1,fg:'3/7',three:'2/4',ft:'1/2',pm:-11},
+      {name:'Haywood Highsmith',pos:'F',num:'19',min:'8:55',pts:3,reb:2,ast:1,stl:0,blk:0,to:0,fg:'1/2',three:'1/2',ft:'0/0',pm:-8},
+    ],
+    report:{summary:"The Minnesota Timberwolves handed the Suns a 116–104 defeat at Target Center. Julius Randle's 32-point performance and Rudy Gobert's 19-rebound night were too much to overcome.\n\nDevin Booker was heroic with 34 points and 11-of-14 from the line but the Suns' 4 fast break points and Minnesota's dominance of the second half (52–41) told the story. Phoenix lost despite leading 39–36 after Q1.",
+    performers:[{name:'Devin Booker',line:'34 PTS · 6 REB · 11/27 FG · 11/14 FT · -3',note:'Heroic effort — 34 points but needed more support. 11-of-14 from the line showed aggression.'},{name:'Oso Ighodaro',line:'16 PTS · 10 REB · 4 AST · 3 STL · 7/12 FG · -6',note:'Strong double-double with 3 steals. Competitive against elite Minnesota frontcourt.'},{name:'Collin Gillespie',line:'12 PTS · 7 AST · 4/13 FG · -10',note:'7 assists is a positive but 4-of-13 shooting hurt a team that needed efficiency.'}],
+    notes:['Suns outrebounded Minnesota 40–49 — Gobert dominated with 19 boards.','Phoenix led by 11 in Q1 — Minnesota outscored them 89–65 in the final 3 quarters.','Just 4 fast break points for the Suns all night.']}
+  },
+  {
+    id:'PHX-BOS-20260316',date:'Mar 16, 2026',opponent:'Boston Celtics',oppAbbr:'BOS',
+    location:'TD Garden, Boston, MA',homeAway:'Away',
+    sunsScore:112,oppScore:120,result:'L',attendance:'19,156',duration:'2:25',
+    quarters:{suns:[32,29,25,26],opp:[31,34,26,29]},
+    teamStats:{fgPct:44.6,threePct:32.5,ftPct:86.2,reb:35,ast:26,stl:7,blk:6,to:9,paintPts:28,secondChance:13,fastBreak:10},
+    players:[
+      {name:'Jalen Green',pos:'F',num:'4',min:'33:21',pts:21,reb:7,ast:1,stl:0,blk:0,to:1,fg:'8/20',three:'1/7',ft:'4/4',pm:-12},
+      {name:"Royce O'Neale",pos:'F',num:'00',min:'18:41',pts:6,reb:2,ast:3,stl:0,blk:2,to:0,fg:'2/5',three:'2/5',ft:'0/0',pm:-4},
+      {name:'Oso Ighodaro',pos:'C',num:'11',min:'32:35',pts:4,reb:4,ast:8,stl:2,blk:0,to:0,fg:'2/4',three:'0/0',ft:'0/0',pm:-2},
+      {name:'Devin Booker',pos:'G',num:'1',min:'37:23',pts:40,reb:3,ast:6,stl:0,blk:1,to:7,fg:'15/24',three:'2/7',ft:'8/9',pm:2},
+      {name:'Collin Gillespie',pos:'G',num:'12',min:'22:38',pts:3,reb:3,ast:1,stl:2,blk:0,to:0,fg:'1/8',three:'1/5',ft:'0/0',pm:-2},
+      {name:'Khaman Maluach',pos:'C',num:'10',min:'12:21',pts:2,reb:3,ast:0,stl:0,blk:0,to:0,fg:'0/1',three:'0/0',ft:'2/2',pm:-8},
+      {name:'Grayson Allen',pos:'G',num:'8',min:'21:42',pts:13,reb:1,ast:2,stl:0,blk:0,to:0,fg:'3/7',three:'2/6',ft:'5/6',pm:-5},
+      {name:'Rasheer Fleming',pos:'F',num:'20',min:'14:45',pts:1,reb:3,ast:0,stl:0,blk:2,to:0,fg:'0/1',three:'0/1',ft:'1/2',pm:0},
+      {name:'Jordan Goodwin',pos:'F',num:'23',min:'23:44',pts:6,reb:5,ast:4,stl:2,blk:0,to:1,fg:'2/5',three:'1/4',ft:'1/2',pm:-9},
+      {name:'Haywood Highsmith',pos:'F',num:'19',min:'18:44',pts:16,reb:4,ast:1,stl:1,blk:0,to:0,fg:'4/8',three:'4/5',ft:'4/4',pm:-1},
+      {name:'Amir Coffey',pos:'G',num:'2',min:'4:06',pts:0,reb:0,ast:0,stl:0,blk:1,to:0,fg:'0/0',three:'0/0',ft:'0/0',pm:1},
+    ],
+    report:{summary:"Boston held off a brilliant Devin Booker 40-point performance to win 120–112 at a sold-out TD Garden. Jaylen Brown answered with 41 points and 18 of them in the fourth quarter to seal it.\n\nPhoenix led by 8 at one point but Booker's 7 turnovers and Boston's perimeter shooting (42.5% from three) proved decisive. The Suns' 86.2% from the line was their best of the road trip but wasn't enough.",
+    performers:[{name:'Devin Booker',line:'40 PTS · 3 REB · 6 AST · 15/24 FG · 8/9 FT · +2',note:'40 points on elite efficiency — one of his best nights of the season. The 7 turnovers cost everything.'},{name:'Haywood Highsmith',line:'16 PTS · 4 REB · 4/5 3PT · 4/4 FT · -1',note:'Best bench performance of the road trip — 4 threes and perfect from the line.'},{name:'Jalen Green',line:'21 PTS · 7 REB · 8/20 FG · -12',note:'21 points but -12 rating tells the story — rough defensively in a game that mattered.'}],
+    notes:["Booker's 40 is the highest single-game total in all tracked Suns games.",'Boston shot 42.5% from three — the perimeter difference was decisive.','Phoenix was outrebounded 38–35 and Boston had 40 paint points to PHX 28.']}
+  }
+];
+
+const WEST = [
+  {seed:1,team:'Oklahoma City Thunder',w:57,l:13,gb:'—',streak:'W3',hl:false},
+  {seed:2,team:'San Antonio Spurs',w:52,l:18,gb:'5',streak:'W2',hl:false},
+  {seed:3,team:'Memphis Grizzlies',w:48,l:22,gb:'9',streak:'L1',hl:false},
+  {seed:4,team:'Golden State Warriors',w:44,l:25,gb:'12.5',streak:'W1',hl:false},
+  {seed:5,team:'Los Angeles Lakers',w:42,l:27,gb:'14.5',streak:'W2',hl:false},
+  {seed:6,team:'Denver Nuggets',w:40,l:29,gb:'16.5',streak:'L2',hl:false},
+  {seed:7,team:'Phoenix Suns',w:39,l:31,gb:'18',streak:'L3',hl:true},
+  {seed:8,team:'Dallas Mavericks',w:38,l:31,gb:'18.5',streak:'W1',hl:false},
+  {seed:9,team:'New Orleans Pelicans',w:35,l:35,gb:'22',streak:'L3',hl:false},
+  {seed:10,team:'LA Clippers',w:33,l:36,gb:'23.5',streak:'W2',hl:false},
+  {seed:11,team:'Utah Jazz',w:28,l:42,gb:'29',streak:'L4',hl:false},
+  {seed:12,team:'Sacramento Kings',w:27,l:43,gb:'30',streak:'W1',hl:false},
+  {seed:13,team:'Minnesota Timberwolves',w:24,l:45,gb:'32.5',streak:'L2',hl:false},
+  {seed:14,team:'Portland Trail Blazers',w:20,l:50,gb:'37',streak:'L5',hl:false},
+  {seed:15,team:'Houston Rockets',w:17,l:52,gb:'39.5',streak:'L3',hl:false},
+];
+
+const LAST_NIGHT = [
+  {away:'New York Knicks',awayScore:93,home:'Brooklyn Nets',homeScore:92,note:'KAT 26 pts 15 reb · 1-pt thriller'},
+  {away:'Golden State Warriors',awayScore:101,home:'Detroit Pistons',homeScore:115,note:'DET dominant — 74 paint pts, Ausar 7 STL'},
+  {away:'Atlanta Hawks',awayScore:95,home:'Houston Rockets',homeScore:117,note:'HOU blowout — 22-point win'},
+  {away:'Portland Trail Blazers',awayScore:108,home:'Minnesota Timberwolves',homeScore:104,note:'⭐ UPSET — POR stuns MIN on the road'},
+  {away:'Boston Celtics',awayScore:117,home:'Memphis Grizzlies',homeScore:112,note:'Brown 30 pts · Garza 22 off bench'},
+  {away:'Toronto Raptors',awayScore:115,home:'Denver Nuggets',homeScore:121,note:'DEN bounce-back after Memphis loss'},
+];
+
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+function load() {
+  try { const r=localStorage.getItem(SK); if(r){const d=JSON.parse(r);if(d&&d.length)return d;} } catch(e){}
+  return [...SEED_GAMES];
+}
+function save(g){ try{localStorage.setItem(SK,JSON.stringify(g));}catch(e){} }
+let games=load();
+
+// ── SECTION NAVIGATION ───────────────────────────────────────────────────────
+function showSection(id){
+  ['games','players','analytics','standings','recap','upload'].forEach(s=>{
+    document.getElementById('sec-'+s).style.display=s===id?'block':'none';
+  });
+  document.querySelectorAll('nav button').forEach((b,i)=>{
+    const ids=['games','players','analytics','standings','recap','upload'];
+    b.classList.toggle('active',ids[i]===id);
+  });
+  if(id==='players')renderPlayers();
+  if(id==='analytics')renderAnalytics();
+  if(id==='standings')renderStandings();
+  if(id==='recap')renderRecap();
+}
+
+// ── RENDER GAMES ─────────────────────────────────────────────────────────────
+function renderGames(){
+  const grid=document.getElementById('games-grid');
+  document.getElementById('games-pill').textContent=games.length+' Game'+(games.length!==1?'s':'');
+  grid.innerHTML='';
+  if(!games.length){grid.innerHTML='<div class="empty"><div class="empty-icon">📋</div>No games yet. Upload a PDF to get started.</div>';return;}
+  games.forEach(g=>{
+    const card=document.createElement('div');
+    card.className='game-card';
+    card.innerHTML=`
+      <div class="game-header-row">
+        <div class="game-date">${g.date}</div>
+        <div><div class="game-matchup">PHX vs ${g.oppAbbr}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">${g.homeAway}</div></div>
+        <div class="game-score">${g.sunsScore}–${g.oppScore}</div>
+        <div><span class="badge badge-${g.result}">${g.result}</span></div>
+        <div class="game-venue">${g.location}</div>
+        <div class="game-toggle">View ▾</div>
+      </div>
+      <div class="game-body">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'report','${g.id}')">Report</button>
+          <button class="tab-btn" onclick="switchTab(this,'box','${g.id}')">Box Score</button>
+          <button class="tab-btn" onclick="switchTab(this,'qtr','${g.id}')">By Quarter</button>
+        </div>
+        <div class="tab-panel active" id="tp-report-${g.id}">${buildReport(g)}</div>
+        <div class="tab-panel" id="tp-box-${g.id}">${buildBox(g)}</div>
+        <div class="tab-panel" id="tp-qtr-${g.id}">${buildQtr(g)}</div>
+      </div>`;
+    card.querySelector('.game-header-row').addEventListener('click',()=>{
+      card.classList.toggle('open');
+      card.querySelector('.game-toggle').textContent=card.classList.contains('open')?'Close ▴':'View ▾';
+    });
+    grid.appendChild(card);
+  });
+}
+
+function switchTab(btn,tab,id){
+  const body=btn.closest('.game-body');
+  body.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  body.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`tp-${tab}-${id}`).classList.add('active');
+}
+
+function buildReport(g){
+  const hasR=g.report&&g.report.summary;
+  let inner='';
+  if(hasR){
+    const r=g.report;
+    inner=`<h3>Game Summary <span class="gen-badge">✓ Generated</span></h3>${r.summary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}<h4>Key Performers</h4>`;
+    r.performers.forEach(p=>{inner+=`<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`;});
+    inner+=`<h4>Notes</h4>`;
+    r.notes.forEach(n=>{inner+=`<p>• ${n}</p>`;});
+  } else {
+    inner=`<div class="empty"><div class="empty-icon">📝</div>No report yet. Click Generate Report below.</div>`;
+  }
+  const pdfBtn=hasR?`<button class="ai-btn" style="background:var(--surface3);border:1px solid var(--border);color:var(--orange);" onclick="event.stopPropagation();downloadPDF('${g.id}')">&#11015; Download PDF</button>`:'';
+  const genBtn=`<button class="ai-btn" id="ai-btn-${g.id}" onclick="event.stopPropagation();generateReport('${g.id}')"><div class="spinner"></div><span>${hasR?'&#x21BA; Regenerate':'&#10022; Generate Report'}</span></button>`;
+  return `<div class="ai-bar"><div class="ai-bar-lbl"><span>AI Report</span> · Auto-generated from box score</div><div style="display:flex;gap:8px;align-items:center;">${pdfBtn}${genBtn}</div></div><div class="report-panel" id="rc-${g.id}">${inner}</div>`;
+}
+
+function buildBox(g){
+  let html=`<div class="tbl-wrap"><div class="team-lbl">☀ Phoenix Suns</div><table class="bx-table"><thead><tr><th>Player</th><th>MIN</th><th>FG</th><th>3PT</th><th>FT</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th><th>TO</th><th>+/-</th><th>PTS</th></tr></thead><tbody>`;
+  const maxPts=Math.max(...g.players.map(p=>p.pts));
+  g.players.forEach(p=>{
+    const pmC=p.pm>0?'pm-pos':p.pm<0?'pm-neg':'';
+    html+=`<tr><td>${p.name} <span class="tag">${p.pos}</span></td><td>${p.min}</td><td>${p.fg}</td><td>${p.three}</td><td>${p.ft}</td><td>${p.reb}</td><td>${p.ast}</td><td>${p.stl}</td><td>${p.blk}</td><td>${p.to}</td><td class="${pmC}">${p.pm>0?'+':''}${p.pm}</td><td class="${p.pts===maxPts?'hi-pts':''}">${p.pts}</td></tr>`;
+  });
+  const ts=g.teamStats;
+  html+=`<tr><td>TOTALS</td><td>—</td><td>${ts.fgPct}%</td><td>${ts.threePct}%</td><td>${ts.ftPct}%</td><td>${ts.reb}</td><td>${ts.ast}</td><td>${ts.stl}</td><td>${ts.blk}</td><td>${ts.to}</td><td>—</td><td>${g.sunsScore}</td></tr></tbody></table></div>`;
+  return html;
+}
+
+function buildQtr(g){
+  const q=g.quarters;
+  let html=`<div class="qtr-row"><div class="qtr-cell"><div class="qtr-lbl">Team</div><div class="qtr-val" style="font-size:13px;color:var(--muted)">PHX<br><span style="color:#444">${g.oppAbbr}</span></div></div>`;
+  for(let i=0;i<4;i++){html+=`<div class="qtr-cell"><div class="qtr-lbl">Q${i+1}</div><div class="qtr-val">${q.suns[i]}<br><span style="color:#555;font-size:14px">${q.opp[i]}</span></div></div>`;}
+  html+=`<div class="qtr-cell final-cell"><div class="qtr-lbl">Final</div><div class="qtr-val">${g.sunsScore}<br><span style="color:#888;font-size:16px">${g.oppScore}</span></div></div></div>`;
+  const ts=g.teamStats;
+  html+=`<div class="mini-stats"><div class="mini-stat"><div class="mini-stat-val">${ts.paintPts}</div><div class="mini-stat-lbl">Paint Pts</div></div><div class="mini-stat"><div class="mini-stat-val">${ts.secondChance}</div><div class="mini-stat-lbl">2nd Chance</div></div><div class="mini-stat"><div class="mini-stat-val">${ts.fastBreak}</div><div class="mini-stat-lbl">Fast Break</div></div></div>`;
+  return html;
+}
+
+// ── AI REPORT GENERATION ─────────────────────────────────────────────────────
+async function generateReport(gameId){
+  const g=games.find(x=>x.id===gameId);if(!g)return;
+  const btn=document.getElementById(`ai-btn-${gameId}`);
+  const rc=document.getElementById(`rc-${gameId}`);
+  btn.classList.add('loading');btn.disabled=true;
+  rc.innerHTML=`<div class="empty"><div style="font-size:28px;animation:spin 1s linear infinite;display:inline-block;">⟳</div><div style="margin-top:8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;">Generating report…</div></div>`;
+  const prompt=`You are a professional NBA game reporter. Generate a structured game report for this Phoenix Suns game. Respond ONLY with valid JSON, no markdown, no fences.
+
+GAME: Phoenix Suns (${g.sunsScore}) vs ${g.opponent} (${g.oppScore}) — Suns ${g.result==='W'?'WIN':'LOSS'}
+Date: ${g.date} | ${g.homeAway} at ${g.location}
+Quarters — Suns: ${g.quarters.suns.join('-')} | Opp: ${g.quarters.opp.join('-')}
+Team Stats: FG ${g.teamStats.fgPct}% | 3PT ${g.teamStats.threePct}% | FT ${g.teamStats.ftPct}% | REB ${g.teamStats.reb} | AST ${g.teamStats.ast} | STL ${g.teamStats.stl} | BLK ${g.teamStats.blk} | TO ${g.teamStats.to} | Paint ${g.teamStats.paintPts} | 2nd Chance ${g.teamStats.secondChance} | Fast Break ${g.teamStats.fastBreak}
+Players: ${g.players.map(p=>`${p.name}: ${p.pts}pts ${p.reb}reb ${p.ast}ast FG ${p.fg} 3PT ${p.three} FT ${p.ft} +/-${p.pm}`).join(' | ')}
+
+Return JSON: {"summary":"Two paragraph ESPN-style narrative. Para 1: result and star performer. Para 2: key storylines and context. Separate with \\n\\n","performers":[{"name":"","line":"XX PTS · XX REB · XX AST · FG · +/-","note":"1-2 sentence analysis"}],"notes":["bullet 1","bullet 2","bullet 3"]}
+Pick 3 most impactful Suns performers. Be specific with numbers.`;
+  try{
+    const r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const rawR=d.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const jsonRStart=rawR.indexOf('{'); const jsonREnd=rawR.lastIndexOf('}')+1;
+    const parsed=JSON.parse(rawR.slice(jsonRStart,jsonREnd));
+    g.report=parsed;save(games);
+    let inner=`<h3>Game Summary<span class="gen-badge">✓ Generated</span></h3>${parsed.summary.split('\n\n').map(p=>`<p>${p}</p>`).join('')}<h4>Key Performers</h4>`;
+    parsed.performers.forEach(p=>{inner+=`<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`;});
+    inner+=`<h4>Notes</h4>`;parsed.notes.forEach(n=>{inner+=`<p>• ${n}</p>`;});
+    rc.innerHTML=inner;
+    // Re-render the entire report tab so PDF button appears
+    const reportTab = document.getElementById(`tp-report-${gameId}`);
+    if(reportTab) reportTab.innerHTML = buildReport(g);
+  }catch(e){
+    if(rc) rc.innerHTML=`<div style="color:var(--loss);padding:12px;font-size:13px;">⚠ Could not generate report. ${e.message}</div>`;
+  }
+  const newBtn = document.getElementById(`ai-btn-${gameId}`);
+  if(newBtn){ newBtn.classList.remove('loading'); newBtn.disabled=false; }
+}
+
+// ── PLAYER CARDS ─────────────────────────────────────────────────────────────
+function renderPlayers(){
+  const grid=document.getElementById('players-grid');
+  const agg={};
+  games.forEach(g=>g.players.forEach(p=>{
+    if(!agg[p.name])agg[p.name]={...p,g:0,tPts:0,tReb:0,tAst:0,tStl:0,tBlk:0};
+    agg[p.name].g++;agg[p.name].tPts+=p.pts;agg[p.name].tReb+=p.reb;
+    agg[p.name].tAst+=p.ast;agg[p.name].tStl+=p.stl;agg[p.name].tBlk+=p.blk;
+  }));
+  const players=Object.values(agg).sort((a,b)=>b.tPts-a.tPts);
+  grid.innerHTML='';
+  players.forEach(p=>{
+    const n=p.g;
+    const ppg=(p.tPts/n).toFixed(1),rpg=(p.tReb/n).toFixed(1),apg=(p.tAst/n).toFixed(1),spg=(p.tStl/n).toFixed(1);
+    const maxPpg=Math.max(...players.map(x=>(x.tPts/x.g)));
+    const card=document.createElement('div');
+    card.className='player-card';card.setAttribute('data-num',p.num);
+    card.innerHTML=`<div class="pc-pos">${p.pos} · #${p.num}</div><div class="pc-name">${p.name}</div>
+      <div class="pc-stats">
+        <div class="pc-stat-row"><div class="pc-lbl">PTS</div><div class="pc-val${(p.tPts/n)===maxPpg?' hi':''}">${ppg}</div></div>
+        <div class="pc-divider"></div>
+        <div class="pc-stat-row"><div class="pc-lbl">REB</div><div class="pc-val">${rpg}</div></div>
+        <div class="pc-divider"></div>
+        <div class="pc-stat-row"><div class="pc-lbl">AST</div><div class="pc-val">${apg}</div></div>
+        <div class="pc-divider"></div>
+        <div class="pc-stat-row"><div class="pc-lbl">STL</div><div class="pc-val">${spg}</div></div>
+        <div class="pc-games">${n} game${n!==1?'s':''} tracked</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── ANALYTICS ────────────────────────────────────────────────────────────────
+function renderAnalytics(){
+  const grid=document.getElementById('analytics-grid');grid.innerHTML='';
+  if(!games.length){grid.innerHTML='<div class="empty">Add games to see analytics.</div>';return;}
+  const avgFg=(games.reduce((s,g)=>s+g.teamStats.fgPct,0)/games.length).toFixed(1);
+  const avg3=(games.reduce((s,g)=>s+g.teamStats.threePct,0)/games.length).toFixed(1);
+  const avgFt=(games.reduce((s,g)=>s+g.teamStats.ftPct,0)/games.length).toFixed(1);
+  const avgPts=(games.reduce((s,g)=>s+g.sunsScore,0)/games.length).toFixed(1);
+  const avgReb=(games.reduce((s,g)=>s+g.teamStats.reb,0)/games.length).toFixed(1);
+  const avgAst=(games.reduce((s,g)=>s+g.teamStats.ast,0)/games.length).toFixed(1);
+  const avgTo=(games.reduce((s,g)=>s+g.teamStats.to,0)/games.length).toFixed(1);
+  const avgPaint=(games.reduce((s,g)=>s+g.teamStats.paintPts,0)/games.length).toFixed(1);
+  const wins=games.filter(g=>g.result==='W').length;
+  const losses=games.filter(g=>g.result==='L').length;
+
+  // Shooting card
+  let c1=`<div class="analytic-card"><div class="analytic-title">Shooting Efficiency</div>`;
+  [['Field Goal %',avgFg,60],['Three-Point %',avg3,45],['Free Throw %',avgFt,100]].forEach(([l,v,max])=>{
+    c1+=`<div class="stat-bar-row"><div class="stat-bar-lbl">${l}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${Math.min(v/max*100,100)}%"></div></div><div class="stat-bar-val">${v}%</div></div>`;
+  });
+  c1+=`</div>`;
+
+  // Scoring card
+  let c2=`<div class="analytic-card"><div class="analytic-title">Scoring Breakdown</div><div class="big-stat-grid">`;
+  [{l:'Avg PTS',v:avgPts},{l:'Avg REB',v:avgReb},{l:'Avg AST',v:avgAst},{l:'Avg TO',v:avgTo}].forEach(({l,v})=>{
+    c2+=`<div class="big-stat"><div class="big-stat-num">${v}</div><div class="big-stat-lbl">${l}</div></div>`;
+  });
+  c2+=`</div></div>`;
+
+  // Win/loss + trends
+  let c3=`<div class="analytic-card"><div class="analytic-title">Record & Trends</div>
+    <div class="trend-row"><div class="trend-lbl">Record (tracked)</div><div class="trend-val neu">${wins}–${losses}</div></div>
+    <div class="trend-row"><div class="trend-lbl">Avg Paint Points</div><div class="trend-val ${avgPaint>=36?'pos':'neg'}">${avgPaint}</div></div>
+    <div class="trend-row"><div class="trend-lbl">Avg Fast Break Pts</div><div class="trend-val neu">${(games.reduce((s,g)=>s+g.teamStats.fastBreak,0)/games.length).toFixed(1)}</div></div>
+    <div class="trend-row"><div class="trend-lbl">Avg 2nd Chance Pts</div><div class="trend-val neu">${(games.reduce((s,g)=>s+g.teamStats.secondChance,0)/games.length).toFixed(1)}</div></div>
+    <div class="trend-row"><div class="trend-lbl">Games on Road</div><div class="trend-val neu">${games.filter(g=>g.homeAway==='Away').length} of ${games.length}</div></div>
+  </div>`;
+
+  // Game-by-game scoring
+  let c4=`<div class="analytic-card"><div class="analytic-title">Game-by-Game Scoring</div>`;
+  [...games].reverse().forEach(g=>{
+    const w=g.sunsScore/130*100;
+    c4+=`<div class="stat-bar-row"><div class="stat-bar-lbl" style="font-size:11px">vs ${g.oppAbbr} (${g.date.split(' ').slice(0,2).join(' ')})</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${w}%;background:${g.result==='W'?'var(--win)':'var(--orange)'}"></div></div><div class="stat-bar-val">${g.sunsScore}</div></div>`;
+  });
+  c4+=`</div>`;
+
+  // Top scorers
+  const agg={};
+  games.forEach(g=>g.players.forEach(p=>{agg[p.name]=(agg[p.name]||0)+p.pts;}));
+  const topScorers=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxTotal=topScorers[0][1];
+  let c5=`<div class="analytic-card"><div class="analytic-title">Top Scorers (Total)</div>`;
+  topScorers.forEach(([name,total])=>{
+    c5+=`<div class="stat-bar-row"><div class="stat-bar-lbl">${name.split(' ').slice(-1)[0]}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${total/maxTotal*100}%"></div></div><div class="stat-bar-val">${total}</div></div>`;
+  });
+  c5+=`</div>`;
+
+  // Q4 scoring trend
+  let c6=`<div class="analytic-card"><div class="analytic-title">Quarter Scoring Averages</div>`;
+  for(let q=0;q<4;q++){
+    const avg=(games.reduce((s,g)=>s+g.quarters.suns[q],0)/games.length).toFixed(1);
+    c6+=`<div class="stat-bar-row"><div class="stat-bar-lbl">Q${q+1}</div><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${avg/35*100}%"></div></div><div class="stat-bar-val">${avg}</div></div>`;
+  }
+  c6+=`</div>`;
+
+  grid.innerHTML=c1+c2+c3+c4+c5+c6;
+}
+
+// ── STANDINGS ────────────────────────────────────────────────────────────────
+function renderStandings(){
+  const body=document.getElementById('standings-body');body.innerHTML='';
+  WEST.forEach(t=>{
+    const pct=(t.w/(t.w+t.l)).toFixed(3).replace(/^0/,'');
+    const tr=document.createElement('tr');
+    if(t.hl)tr.className='hl';
+    tr.innerHTML=`<td><span class="seed-num${t.seed<=6?' top':''}">${t.seed}</span></td>
+      <td>${t.team}${t.hl?' ☀':''}</td>
+      <td>${t.w}</td><td>${t.l}</td>
+      <td class="wl-pct">${pct}</td>
+      <td>${t.gb}</td>
+      <td style="color:${t.streak.startsWith('W')?'var(--win)':'var(--loss)'}">${t.streak}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+// ── RECAP ────────────────────────────────────────────────────────────────────
+let liveGames=[];
+
+async function renderRecap(){
+  var div=document.getElementById('recap-games');
+  var hdr=document.getElementById('recap-header');
+  div.innerHTML='<div class="import-progress-card" style="padding:20px;"><div class="ip-spinner" style="font-size:22px;">&#8635;</div><div class="ip-status" style="font-size:13px;margin-top:8px;">Fetching last night\'s scores...</div></div>';
+  try{
+    var now=new Date();
+    var yesterday=new Date(now);
+    yesterday.setDate(yesterday.getDate()-1);
+    var dateStr=yesterday.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    var prompt='List all NBA game results from '+dateStr+'. For each completed game write one line starting with GAME: like this: GAME: Boston Celtics 115-102 Miami Heat | Jaylen Brown 34 pts. If no games were played write NO_GAMES.';
+    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    var d=await r.json();
+    var text=d.content.map(function(i){return i.text||'';}).join('');
+    if(text.indexOf('NO_GAMES')>-1){
+      div.innerHTML='<div class="empty"><div class="empty-icon">&#127936;</div>No NBA games were played last night.</div>';
+      if(hdr)hdr.textContent=dateStr+' - No Games';
+      return;
+    }
+    var allLines=text.split('\n');
+    var gameLines=allLines.filter(function(l){return l.trim().indexOf('GAME:')===0;});
+    liveGames=gameLines.map(function(l){
+      var clean=l.replace('GAME:','').trim();
+      var parts=clean.split('|');
+      return{scorePart:parts[0]?parts[0].trim():'',note:parts[1]?parts[1].trim():''};
+    }).filter(function(g){return g.scorePart;});
+    if(hdr)hdr.textContent=dateStr+' - '+liveGames.length+' Game'+(liveGames.length!==1?'s':'');
+    if(liveGames.length===0){
+      div.innerHTML='<div class="report-panel" style="margin:0;"><p>'+text+'</p></div>';
+      return;
+    }
+    div.innerHTML='';
+    liveGames.forEach(function(g){
+      div.innerHTML+='<div class="recap-game-row"><div style="flex:2;font-family:Barlow Condensed,sans-serif;font-weight:800;font-size:15px;color:var(--text)">'+g.scorePart+'</div><div class="recap-note">'+g.note+'</div></div>';
+    });
+  }catch(e){
+    div.innerHTML='<div style="color:var(--loss);padding:16px;font-size:13px;">&#9888; Could not fetch scores: '+e.message+'</div>';
+  }
+}
+
+async function generateRecap(){
+  var btn=document.getElementById('recap-btn');
+  btn.classList.add('loading');btn.disabled=true;
+  var reportDiv=document.getElementById('recap-report');
+  reportDiv.style.display='block';
+  reportDiv.innerHTML='<div class="import-progress-card"><div class="ip-spinner">&#8635;</div><div class="ip-status">Generating recap...</div><div class="ip-sub">Claude is analyzing last night\'s games</div></div>';
+  var now=new Date();
+  var yesterday=new Date(now);
+  yesterday.setDate(yesterday.getDate()-1);
+  var dateStr=yesterday.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  var gameList=liveGames.length>0?liveGames.map(function(g){return g.scorePart+' - '+g.note;}).join('. '):'the most recent NBA games';
+  var prompt='You are an NBA analyst. Write a nightly recap for '+dateStr+'. Games: '+gameList+'. Write 2-3 punchy ESPN-style sentences per game. Highlight the star performer and one key stat. End with a Game of the Night pick. Keep it under 500 words. Plain text only. Use headers like BOS 115, MIA 98 for each game.';
+  try{
+    var r=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    var d=await r.json();
+    var text=d.content.map(function(i){return i.text||'';}).join('');
+    var formatted=text.split('\n').map(function(l){return l.trim()?'<p>'+l+'</p>':'';}).join('');
+    reportDiv.innerHTML='<div class="report-panel"><h3>NBA Nightly Recap <span class="gen-badge">&#10003; AI Generated</span></h3>'+formatted+'</div>';
+  }catch(e){
+    reportDiv.innerHTML='<div style="color:var(--loss);padding:12px;font-size:13px;">&#9888; Could not generate recap. '+e.message+'</div>';
+  }
+  btn.classList.remove('loading');btn.disabled=false;
+  btn.querySelector('span').textContent='Regenerate';
+}
+
+// ── PDF UPLOAD PIPELINE ──────────────────────────────────────────────────────
+const uz=document.getElementById('upload-zone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
+uz.addEventListener('drop',e=>{e.preventDefault();uz.classList.remove('drag');const f=Array.from(e.dataTransfer.files).find(f=>f.name.endsWith('.pdf'));if(f)processPDF(f);else showUploadError('Please drop a PDF file.');});
+document.getElementById('file-input').addEventListener('change',e=>{if(e.target.files[0])processPDF(e.target.files[0]);});
+
+function setProgress(pct,status,sub){
+  document.getElementById('progress-fill').style.width=pct+'%';
+  if(status)document.getElementById('ip-status').textContent=status;
+  if(sub)document.getElementById('ip-sub').textContent=sub;
+}
+
+function showUploadError(msg){
+  document.getElementById('upload-step-1').style.display='block';
+  document.getElementById('upload-step-2').style.display='none';
+  const s3=document.getElementById('upload-step-3');
+  s3.innerHTML=`<div style="margin-top:12px;background:var(--surface);border:1px solid var(--loss);border-radius:var(--radius-lg);padding:14px 18px;color:var(--loss);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;">⚠ ${msg}</div>`;
+  s3.style.display='block';
+}
+
+async function processPDF(file){
+  if(window.location.protocol==='file:'){
+    document.getElementById('upload-step-3').innerHTML=`<div style="background:var(--surface);border:1px solid var(--gold);border-radius:var(--radius-lg);padding:22px 26px;margin-top:0;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:17px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;">ℹ One extra step</div>
+      <div style="font-size:13px;color:#ccc;line-height:1.7;">Your browser blocks AI connections when opening HTML files locally. <strong style="color:#fff">Host this file online</strong> (Netlify, GitHub Pages — both free) and the upload will work end-to-end automatically.<br><br>Or drop the PDF in the Claude chat — I'll process it and update this file in seconds.</div>
+    </div>`;
+    document.getElementById('upload-step-3').style.display='block';
+    return;
+  }
+  document.getElementById('upload-step-1').style.display='none';
+  document.getElementById('upload-step-3').style.display='none';
+  document.getElementById('upload-step-2').style.display='block';
+  setProgress(8,'Reading PDF...','Preparing for Claude AI');
+  const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=()=>rej(new Error('Read failed'));r.readAsDataURL(file);});
+  setProgress(22,'Sending to Claude...','Extracting stats from box score');
+  const ep=`You are an NBA stats extractor. Read this NBA Official Scorer's Report PDF and extract ALL data precisely. Respond ONLY with valid JSON — no markdown, no explanation.
+Return: {"date":"Mon DD, YYYY","opponent":"Full Name","oppAbbr":"3-LETTER","location":"Arena, City, ST","homeAway":"Home or Away","sunsScore":0,"oppScore":0,"result":"W or L","attendance":"00,000","duration":"H:MM","quarters":{"suns":[Q1,Q2,Q3,Q4],"opp":[Q1,Q2,Q3,Q4]},"teamStats":{"fgPct":0.0,"threePct":0.0,"ftPct":0.0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"paintPts":0,"secondChance":0,"fastBreak":0},"players":[{"name":"First Last","pos":"F","num":"0","min":"MM:SS","pts":0,"reb":0,"ast":0,"stl":0,"blk":0,"to":0,"fg":"M/A","three":"M/A","ft":"M/A","pm":0}]}
+Suns may be VISITOR or HOME. Only include players who played (skip DNP).`;
+  let gd;
+  try{
+    const r1=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:ep}]}]})});
+    const d1=await r1.json();
+    const raw1=d1.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const json1Start=raw1.indexOf('{'); const json1End=raw1.lastIndexOf('}')+1;
+    gd=JSON.parse(raw1.slice(json1Start,json1End));
+  }catch(e){showUploadError('Could not read this PDF. Make sure it is an NBA Official Scorer\'s Report. ('+e.message+')');document.getElementById('upload-step-2').style.display='none';document.getElementById('upload-step-1').style.display='block';return;}
+  setProgress(55,'Stats extracted!','Generating game report...');
+  const gid='PHX-'+gd.oppAbbr+'-'+gd.date.replace(/[^0-9]/g,'');
+  if(games.find(g=>g.id===gid)){showUploadError('This game ('+gd.date+' vs '+gd.opponent+') is already in your portfolio.');document.getElementById('upload-step-2').style.display='none';document.getElementById('upload-step-1').style.display='block';return;}
+  const rp=`You are a professional NBA game reporter. Generate a structured game report for this Phoenix Suns game. Respond ONLY with valid JSON — no markdown.
+GAME: Suns (${gd.sunsScore}) vs ${gd.opponent} (${gd.oppScore}) — Suns ${gd.result==='W'?'WIN':'LOSS'} | ${gd.homeAway} at ${gd.location} | ${gd.date}
+Quarters — Suns: ${gd.quarters.suns.join('-')} | Opp: ${gd.quarters.opp.join('-')}
+Team: FG ${gd.teamStats.fgPct}% | 3PT ${gd.teamStats.threePct}% | FT ${gd.teamStats.ftPct}% | REB ${gd.teamStats.reb} | AST ${gd.teamStats.ast} | Paint ${gd.teamStats.paintPts} | TO ${gd.teamStats.to}
+Players: ${gd.players.map(p=>`${p.name}: ${p.pts}pts ${p.reb}reb ${p.ast}ast FG ${p.fg} +/-${p.pm}`).join(' | ')}
+Return: {"summary":"Two paragraph ESPN-style narrative separated by \\n\\n","performers":[{"name":"","line":"XX PTS · XX REB · FG · +/-","note":"1-2 sentences"}],"notes":["stat note 1","stat note 2","stat note 3"]}`;
+  let report=null;
+  try{
+    setProgress(72,'Writing report...','Claude is analyzing the game');
+    const r2=await fetch('/.netlify/functions/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:rp}]})});
+    const d2=await r2.json();
+    const raw2=d2.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+    const json2Start=raw2.indexOf('{'); const json2End=raw2.lastIndexOf('}')+1;
+    report=JSON.parse(raw2.slice(json2Start,json2End));
+  }catch(e){report=null;}
+  setProgress(95,'Saving to portfolio...');
+  await new Promise(r=>setTimeout(r,400));
+  const ng={...gd,id:gid,report};
+  games.unshift(ng);save(games);
+  setProgress(100,'Done!','');
+  await new Promise(r=>setTimeout(r,500));
+  document.getElementById('upload-step-2').style.display='none';
+  const rc=ng.result==='W'?'var(--win)':'var(--loss)';
+  document.getElementById('upload-step-3').innerHTML=`<div class="success-card">
+    <div><div class="success-title">✓ Game Added!</div>
+    <div class="success-sub">${ng.date} · PHX vs ${ng.oppAbbr} · <span style="color:${rc};font-weight:700">${ng.result==='W'?'WIN':'LOSS'} ${ng.sunsScore}–${ng.oppScore}</span> · ${report?'Report generated':'Report pending'}</div></div>
+    <button class="btn-primary" onclick="resetUpload()">+ Add Another</button>
+  </div>`;
+  document.getElementById('upload-step-3').style.display='block';
+  renderGames();renderPlayers();updateHero();
+  setTimeout(()=>showSection('games'),1200);
+}
+
+function resetUpload(){
+  document.getElementById('upload-step-1').style.display='block';
+  document.getElementById('upload-step-2').style.display='none';
+  document.getElementById('upload-step-3').style.display='none';
+  document.getElementById('upload-step-3').innerHTML='';
+  document.getElementById('file-input').value='';
+  setProgress(0,'Reading PDF...','Sending to Claude AI');
+}
+
+// ── HERO UPDATE ──────────────────────────────────────────────────────────────
+function updateHero(){
+  document.getElementById('h-games').textContent=games.length;
+  if(!games.length)return;
+  document.getElementById('h-ppg').textContent=(games.reduce((s,g)=>s+g.sunsScore,0)/games.length).toFixed(1);
+  const agg={};games.forEach(g=>g.players.forEach(p=>{agg[p.name]=(agg[p.name]||0)+p.pts;}));
+  const top=Object.entries(agg).sort((a,b)=>b[1]-a[1])[0];
+  if(top)document.getElementById('h-top').textContent=top[0].split(' ').slice(-1)[0];
+  const last=games[0];
+  const streak=games.reduce((s,g,i)=>{if(i===0)return{r:g.result,n:1};if(g.result===s.r)return{r:s.r,n:s.n+1};return s;},{r:'',n:0});
+  const streakEl=document.getElementById('h-streak');
+  streakEl.textContent=(streak.r==='W'?'W':'L')+streak.n;
+  streakEl.style.color=streak.r==='W'?'var(--win)':'var(--loss)';
+}
+
+// ── DOWNLOAD PDF ─────────────────────────────────────────────────────────────
+function downloadPDF(gameId) {
+  const g = games.find(x => x.id === gameId);
+  if (!g || !g.report) return;
+
+  // Build a clean printable HTML page
+  const r = g.report;
+  const ts = g.teamStats;
+  const maxPts = Math.max(...g.players.map(p => p.pts));
+
+  const playerRows = g.players.map(p => `
+    <tr>
+      <td style="text-align:left;font-weight:600;">${p.name} <span style="background:#eee;color:#555;font-size:9px;padding:1px 5px;border-radius:2px;">${p.pos}</span></td>
+      <td>${p.pts}</td><td>${p.reb}</td><td>${p.ast}</td><td>${p.stl}</td>
+      <td>${p.fg}</td><td>${p.three}</td><td>${p.ft}</td>
+      <td style="color:${p.pm>0?'#1E7A3E':p.pm<0?'#C0392B':'#888'}">${p.pm>0?'+':''}${p.pm}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Game Report - PHX vs ${g.oppAbbr} ${g.date}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; color: #111; background: #fff; padding: 40px; font-size: 13px; line-height: 1.6; }
+  .title-block { border-bottom: 3px solid #1A3A5C; padding-bottom: 14px; margin-bottom: 20px; }
+  .main-title { font-size: 28px; font-weight: 900; color: #1A3A5C; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .main-title span { color: #E56020; }
+  .subtitle { font-size: 13px; color: #666; }
+  .section-hdr { font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #E56020; border-bottom: 2px solid #E56020; padding-bottom: 6px; margin: 22px 0 12px; }
+  p { margin-bottom: 9px; color: #333; font-size: 13px; }
+  .performer { background: #f8f8f8; border-left: 4px solid #E56020; padding: 10px 14px; margin-bottom: 8px; border-radius: 0 4px 4px 0; }
+  .performer-name { font-weight: 900; font-size: 14px; color: #1A3A5C; }
+  .performer-line { color: #E56020; font-weight: 700; font-size: 12px; margin: 3px 0; }
+  .performer-note { color: #555; font-size: 12px; }
+  .note-item { margin-bottom: 6px; font-size: 12px; color: #333; }
+  .note-item::before { content: "• "; color: #E56020; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  th { background: #1A3A5C; color: #fff; padding: 7px 8px; text-align: center; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  th:first-child { text-align: left; }
+  td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  td:first-child { text-align: left; }
+  tr:last-child td { background: #fff3e8; color: #E56020; font-weight: 700; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .qtr-table th { background: #1A3A5C; }
+  .team-stats-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin-top: 10px; }
+  .ts-box { background: #f5f5f5; border-radius: 4px; padding: 10px; text-align: center; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ts-val { font-size: 20px; font-weight: 900; color: #E56020; }
+  .ts-lbl { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: 600; margin-top: 2px; }
+  .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid #ddd; font-size: 10px; color: #999; text-align: center; }
+  @media print { body { padding: 20px; } }
+</style>
+</head>
+<body>
+  <div class="title-block">
+    <div class="main-title">GAME REPORT — <span>PHX ${g.sunsScore}</span> · ${g.oppAbbr} ${g.oppScore}</div>
+    <div class="subtitle">${g.date} · ${g.location} · ${g.homeAway} · Attendance: ${g.attendance} · Duration: ${g.duration}</div>
+  </div>
+
+  <div class="section-hdr">Game Summary</div>
+  ${r.summary.split('\n\n').map(para => `<p>${para}</p>`).join('')}
+
+  <div class="section-hdr">Score by Quarter</div>
+  <table class="qtr-table">
+    <thead><tr><th>Team</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Final</th></tr></thead>
+    <tbody>
+      <tr><td style="font-weight:700;">Phoenix Suns</td><td>${g.quarters.suns[0]}</td><td>${g.quarters.suns[1]}</td><td>${g.quarters.suns[2]}</td><td>${g.quarters.suns[3]}</td><td style="font-weight:900;color:${g.result==='W'?'#1E7A3E':'#C0392B'}">${g.sunsScore}</td></tr>
+      <tr><td style="font-weight:700;">${g.opponent}</td><td>${g.quarters.opp[0]}</td><td>${g.quarters.opp[1]}</td><td>${g.quarters.opp[2]}</td><td>${g.quarters.opp[3]}</td><td style="font-weight:900;color:${g.result==='L'?'#1E7A3E':'#C0392B'}">${g.oppScore}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Key Performers — Phoenix Suns</div>
+  ${r.performers.map(p => `<div class="performer"><div class="performer-name">${p.name}</div><div class="performer-line">${p.line}</div><div class="performer-note">${p.note}</div></div>`).join('')}
+
+  <div class="section-hdr">Box Score — Phoenix Suns</div>
+  <table>
+    <thead><tr><th>Player</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>FG</th><th>3PT</th><th>FT</th><th>+/-</th></tr></thead>
+    <tbody>
+      ${playerRows}
+      <tr><td>TOTALS</td><td>${g.sunsScore}</td><td>${ts.reb}</td><td>${ts.ast}</td><td>${ts.stl}</td><td>${ts.fgPct}%</td><td>${ts.threePct}%</td><td>${ts.ftPct}%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-hdr">Team Statistics</div>
+  <div class="team-stats-grid">
+    ${[['FG%',ts.fgPct+'%'],['3PT%',ts.threePct+'%'],['FT%',ts.ftPct+'%'],['REB',ts.reb],['AST',ts.ast],['Paint Pts',ts.paintPts],['2nd Chance',ts.secondChance],['Fast Break',ts.fastBreak],['TO',ts.to],['STL',ts.stl]].map(([l,v])=>`<div class="ts-box"><div class="ts-val">${v}</div><div class="ts-lbl">${l}</div></div>`).join('')}
+  </div>
+
+  <div class="section-hdr">Notes</div>
+  ${r.notes.map(n => `<div class="note-item">${n}</div>`).join('')}
+
+  <div class="footer">Phoenix Suns · 2025–26 Season Stats Hub · ${g.date} · PHX vs ${g.oppAbbr}</div>
+</body>
+</html>`;
+
+  // Open in new window and trigger print dialog
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => {
+    setTimeout(() => {
+      win.print();
+    }, 500);
+  };
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderGames();
+updateHero();
+</script>
+</body>
+</html>
